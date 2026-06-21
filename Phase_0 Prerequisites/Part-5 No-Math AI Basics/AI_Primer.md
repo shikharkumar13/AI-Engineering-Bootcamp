@@ -1,4 +1,4 @@
-# Phase 00, Part 5 — A Gentle, No-Math AI Primer
+# Phase 0, Part 5 - A Gentle, No-Math AI Primer
 
 > **Who this is for:** You're about to start Phase 01, and words like
 > "tokens," "parameters," and "embeddings" are about to show up constantly.
@@ -598,17 +598,3 @@ before Phase 07 specifically. It is **not** required for Phases 01-06 or 08.
    similar) never changes. This is exactly what powers Phase 04's retrieval.
 
 ---
-
-## 12. What's Next
-
-You now have the vocabulary every phase from here on assumes you already
-know. Tokens, context windows, temperature, embeddings, parameters,
-training versus inference — none of these should feel like unexplained
-jargon anymore.
-
-**Part 6 — the Capstone Checkpoint** ties everything from Phase 00 together
-in one guided project, plus a final readiness checklist before you start
-Phase 01 for real.
-
-Say **"Start Part 6"** when you're ready, or **"Start Part 2"** / **"Start
-Part 3"** if you'd still like to cover core Python fundamentals first.
