@@ -1,4 +1,4 @@
-# Phase 00, Part 1 — Dev Environment & Tools
+# Phase 00, Part 1 - Dev Environment & Tools
 
 > **Who this is for:** You have never opened a terminal, never installed a
 > programming language, and never used an IDE. That is completely fine — this
@@ -832,15 +832,3 @@ automatic muscle memory.
    01's first API call through Phase 08's Docker deployment.
 
 ---
-
-## 12. What's Next
-
-**Part 2 — Python Fundamentals I** starts actually teaching you to write
-Python: variables, data types, strings, lists, dictionaries, control flow,
-and functions. By the end of Part 2, you'll be able to build a working
-command-line program from scratch — the exact building blocks every file in
-Phases 01-08 is made of.
-
-Say **"Start Part 2"** when you're ready, or revisit anything in this guide
-first — there's no rush, and getting comfortable with your terminal now will
-make everything else in this course noticeably smoother.
