@@ -1,0 +1,1 @@
+For these 2 parts, refer and study from this repository https://github.com/shikharkumar13/Python-Programming-Code
