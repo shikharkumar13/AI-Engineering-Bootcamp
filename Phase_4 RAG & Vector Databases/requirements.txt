@@ -1,0 +1,32 @@
+# Phase 04: RAG & Vector Databases
+# pip install -r requirements.txt
+
+# LangChain
+langchain>=0.3.0
+langchain-openai>=0.2.0
+langchain-community>=0.3.0
+langchain-text-splitters>=0.3.0
+langchain-experimental>=0.3.0
+
+# Vector store
+chromadb>=0.5.0
+
+# Embeddings & re-ranking (local, free)
+sentence-transformers>=3.0.0
+
+# Sparse retrieval
+rank-bm25>=0.2.2
+
+# LLM
+openai>=1.40.0
+
+# Loaders
+pypdf>=4.0.0
+beautifulsoup4>=4.12.0
+
+# UI
+streamlit>=1.38.0
+
+# Utilities
+python-dotenv>=1.0.0
+numpy>=1.26.0
