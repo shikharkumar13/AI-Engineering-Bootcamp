@@ -1,4 +1,4 @@
-# Phase 00, Part 4 — The Command Line, APIs & the Web
+# Phase 0, Part 4 - The Command Line, APIs & the Web
 
 > **Who this is for:** You've never thought about what actually happens when
 > an app "talks to the internet." This guide assumes nothing — by the end,
@@ -755,22 +755,3 @@ scraped. Then add `.env` to `.gitignore` before creating a new key.
    inside actual programs.
 
 ---
-
-## 12. What's Next
-
-You now understand every piece of what's happening when Phase 01's
-`client.chat.completions.create(...)` runs — it's a `POST` request, with a
-JSON body, an `Authorization` header carrying your API key (safely loaded
-from `.env`), sent to one of OpenAI's servers, getting a JSON response back.
-
-If you haven't yet, **Parts 2 and 3** cover core Python programming
-(variables, functions, classes, error handling) — worth doing before Phase
-01 if any of the Python snippets in this guide felt unfamiliar.
-
-**Part 5 — A Gentle, No-Math AI Primer** comes next in the Phase 00 series:
-what machine learning and neural networks actually are, how an LLM "writes"
-one word at a time, and an intuitive feel for tokens and embeddings —
-exactly the vocabulary Phase 01 starts using on its very first page.
-
-Say **"Start Part 5"** when you're ready, or **"Start Part 2"** if you'd
-like to go back and cover Python fundamentals first.
