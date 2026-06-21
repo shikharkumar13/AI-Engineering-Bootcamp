@@ -1,0 +1,23 @@
+# Dockerfile.streamlit — Production Streamlit Frontend
+#
+# Build:  docker build -t ai-service-frontend -f Dockerfile.streamlit .
+# Run:    docker run -p 8501:8501 -e API_URL=http://api:8000 ai-service-frontend
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY phase08_requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY streamlit_app.py .
+
+EXPOSE 8501
+
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import httpx; httpx.get('http://localhost:8501/_stcore/health', timeout=3).raise_for_status()" || exit 1
+
+CMD ["streamlit", "run", "streamlit_app.py", "--server.address=0.0.0.0", "--server.port=8501"]

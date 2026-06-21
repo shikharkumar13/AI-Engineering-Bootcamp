@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - VALID_API_KEYS=${VALID_API_KEYS:-demo-key-123}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-https://cloud.langfuse.com}
+      - COLLECTION_NAME=production_docs
+      - CHROMA_PERSIST_DIR=/app/chroma_db
+    volumes:
+      - chroma_data:/app/chroma_db   # persist vector DB across container restarts
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health', timeout=3).raise_for_status()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000   # resolves via Docker's internal DNS using the service name
+      - API_KEY=${VALID_API_KEYS:-demo-key-123}
+    depends_on:
+      api:
+        condition: service_healthy   # wait for the backend to be genuinely ready, not just started
+
+volumes:
+  chroma_data:
