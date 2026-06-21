@@ -13,14 +13,14 @@
 
 ## Table of Contents
 
-1. [Before We Start — About the Parts 2-3 Gap](#1-before-we-start--about-the-parts-2-3-gap)
+1. [Before We Start - About the Parts 2-3 Gap](#1-before-we-start--about-the-parts-2-3-gap)
 2. [What You're Building](#2-what-youre-building)
-3. [Step 1 — Project Setup](#3-step-1--project-setup)
-4. [Step 2 — Fetching Advice (Functions)](#4-step-2--fetching-advice-functions)
-5. [Step 3 — Handling Errors Gracefully (try/except)](#5-step-3--handling-errors-gracefully-tryexcept)
-6. [Step 4 — Saving Entries to a File (File I/O)](#6-step-4--saving-entries-to-a-file-file-io)
-7. [Step 5 — Bundling It Together (Classes)](#7-step-5--bundling-it-together-classes)
-8. [Step 6 — An Interactive Menu (Control Flow)](#8-step-6--an-interactive-menu-control-flow)
+3. [Step 1 - Project Setup](#3-step-1--project-setup)
+4. [Step 2 - Fetching Advice (Functions)](#4-step-2--fetching-advice-functions)
+5. [Step 3 - Handling Errors Gracefully (try/except)](#5-step-3--handling-errors-gracefully-tryexcept)
+6. [Step 4 - Saving Entries to a File (File I/O)](#6-step-4--saving-entries-to-a-file-file-io)
+7. [Step 5 - Bundling It Together (Classes)](#7-step-5--bundling-it-together-classes)
+8. [Step 6 - An Interactive Menu (Control Flow)](#8-step-6--an-interactive-menu-control-flow)
 9. [The Complete Script](#9-the-complete-script)
 10. [Running & Testing It](#10-running--testing-it)
 11. [Pushing to GitHub](#11-pushing-to-github)
@@ -30,7 +30,7 @@
 
 ---
 
-## 1. Before We Start — About the Parts 2-3 Gap
+## 1. Before We Start - About the Parts 2-3 Gap
 
 Parts 2 and 3 normally is where you study Python properly: variables, data types, control
 flow, functions, classes, error handling, file I/O, type hints — each with
