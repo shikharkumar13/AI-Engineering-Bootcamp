@@ -1,9 +1,9 @@
-# Phase 00, Part 6 — Capstone Checkpoint
+# Phase 0, Part 6 - Capstone Checkpoint
 
 > **Who this is for:** You've done Parts 1, 4, and 5 — terminal/Git/VS Code,
-> APIs/JSON/.env, and the no-math AI primer. You have **not** yet done Parts
+> APIs/JSON/.env, and the no-math AI primer. If you have **not** yet done Parts
 > 2-3 (core Python fundamentals). This guide teaches just enough Python —
-> functions, error handling, classes, file I/O, control flow — to build one
+> functions, error handling, classes, file I/O, control flow to build one
 > real project, explained inline as each piece is needed.  
 > **What you'll have by the end:** A working command-line app you built
 > yourself, pushed to GitHub, plus a final checklist before Phase 01.  
@@ -32,9 +32,9 @@
 
 ## 1. Before We Start — About the Parts 2-3 Gap
 
-Parts 2 and 3 normally teach Python properly: variables, data types, control
+Parts 2 and 3 normally is where you study Python properly: variables, data types, control
 flow, functions, classes, error handling, file I/O, type hints — each with
-room to breathe and practice. You've skipped straight here, so this capstone
+room to breathe and practice. If you've skipped straight here, so this capstone
 does something different: it builds **one real project**, and teaches each
 new Python concept in a small **New concept** box, right at the moment the
 project needs it — just enough to understand and use that piece correctly.
@@ -58,7 +58,7 @@ A **Daily Advice Journal** — a small command-line app that:
 3. Lets you view everything you've saved so far
 4. Runs as an interactive menu, looping until you choose to quit
 
-This single project touches everything you're missing from Parts 2-3 —
+This single project touches everything you might be missing from Parts 2-3 —
 functions, error handling, classes, file I/O, loops — while reusing exactly
 what you already know from Part 4 (calling an API, reading JSON).
 
@@ -615,15 +615,10 @@ noticeably less frustrating.
 
 ## 14. What's Next
 
-If your checklist came back mostly solid: **you're done with Phase 00.**
-Move straight into **Phase 01 — Universal LLM Client**, where everything
+If your checklist came back mostly solid: **you're done with Phase 0.**
+Move straight into **Phase 01 - Universal LLM Client**, where everything
 from this entire pre-requisite series finally gets put to direct use —
 terminal and venv skills from Part 1, the HTTP/JSON/API-key concepts from
 Part 4 (you'll recognize `Authorization: Bearer` immediately), the
 token/parameter vocabulary from Part 5, and the functions/classes/error-
 handling fundamentals from this capstone.
-
-If your checklist flagged gaps in core Python: say **"Start Part 2"** to
-go back and build that foundation properly before Phase 01.
-
-Either way — you've come a long way from "never opened a terminal." Well done.
