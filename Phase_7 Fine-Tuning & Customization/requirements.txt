@@ -1,0 +1,34 @@
+# Phase 07: Fine-tuning & Customization
+#
+# IMPORTANT: unsloth, bitsandbytes, and torch (CUDA build) require a GPU.
+# This requirements file is meant to be installed in Google Colab or another
+# CUDA-capable environment, NOT a CPU-only machine.
+#
+# In Google Colab, run this first cell instead of pip installing from this file:
+#   !pip install unsloth
+#   !pip install --no-deps trl peft accelerate bitsandbytes
+#
+# pip install -r phase07_requirements.txt   (on a CUDA machine)
+
+unsloth>=2024.9
+torch>=2.1.0
+transformers>=4.44.0
+datasets>=2.20.0
+trl>=0.9.0
+peft>=0.12.0
+accelerate>=0.33.0
+bitsandbytes>=0.43.0
+
+huggingface_hub>=0.24.0
+
+# For evaluation (LLM-as-judge)
+openai>=1.40.0
+instructor>=1.3.0
+pydantic>=2.0.0
+
+# For serving
+fastapi>=0.110.0
+uvicorn>=0.30.0
+httpx>=0.27.0
+
+python-dotenv>=1.0.0
