@@ -1,4 +1,4 @@
-# Phase 00, Part 1 - Dev Environment & Tools
+# Phase 0, Part 1 - Dev Environment & Tools
 
 > **Who this is for:** You have never opened a terminal, never installed a
 > programming language, and never used an IDE. That is completely fine — this
