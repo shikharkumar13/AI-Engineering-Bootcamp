@@ -1,4 +1,4 @@
-# AI Engineer Roadmap — From Zero to Production
+# AI Engineer Roadmap - From Zero to Production
 
 A complete, hands-on path to becoming an AI Engineer: from never having opened
 a terminal, to shipping a containerized, evaluated, observable AI product.
@@ -29,7 +29,7 @@ this repo is pseudocode — every script here has actually been run.
 
 This repo is a self-contained curriculum for going from **complete beginner**
 (or from "I know ML/DL theory but have never shipped an AI product") to
-**hireable AI Engineer** — someone who can design, build, evaluate, and
+**hireable AI Engineer**, someone who can design, build, evaluate, and
 deploy real LLM-powered systems, not just call an API in a notebook.
 
 ```mermaid
@@ -77,18 +77,18 @@ Know ML/DL and Development already?   ──────────────
 
 ## The Curriculum
 
-### Phase 00 — Foundations (prerequisite track)
+### Phase 0 - Foundations (prerequisite track)
 
 | Part | Topic | Status |
 |---|---|---|
-| 1 | Dev environment & tools — terminal, Python install, virtual environments, VS Code, Git & GitHub | ✅ |
-| 2 | Python fundamentals I — variables, data types, control flow, functions |
-| 3 | Python fundamentals II — classes, error handling, file I/O, type hints, decorators |
-| 4 | The command line, APIs & the web — HTTP, JSON, API keys, `.env` files, localhost/ports | ✅ |
-| 5 | A gentle, no-math AI primer — ML, neural networks, LLMs, tokens, embeddings | ✅ |
-| 6 | Capstone checkpoint — guided mini-project + full readiness checklist | ✅ |
+| 1 | Dev environment & tools - terminal, Python install, virtual environments, VS Code, Git & GitHub | ✅ |
+| 2 | Python fundamentals I - variables, data types, control flow, functions |
+| 3 | Python fundamentals II - classes, error handling, file I/O, type hints, decorators |
+| 4 | The command line, APIs & the web - HTTP, JSON, API keys, `.env` files, localhost/ports | ✅ |
+| 5 | A gentle, no-math AI primer - ML, neural networks, LLMs, tokens, embeddings | ✅ |
+| 6 | Capstone checkpoint - guided mini-project + full readiness checklist | ✅ |
 
-### Phase 01 – 08 — The Core Roadmap
+### Phase 01 – 08 - The Core Roadmap
 
 | Phase | Title | What You Build | Key Skills |
 |---|---|---|---|
@@ -121,7 +121,7 @@ ai-engineer-roadmap/
 │
 ├── phase00-foundations/
 │   ├── part1-dev-environment/
-│   │   ├── README.md                  (the article)
+│   │   ├── README.md                  
 │   │   ├── cheatsheet.md
 │   │   └── check_setup.py
 │   ├── part4-apis-and-the-web/
@@ -222,7 +222,7 @@ git clone https://github.com/yourusername/ai-engineer-roadmap.git
 cd ai-engineer-roadmap
 
 # 2. Pick your starting point
-#    - No tech background?      → start in phase00-foundations/part1-dev-environment/
+#    - No tech background?      → start in phase0-foundations/part1-dev-environment/
 #    - Know ML/DL already?      → start in phase01-llm-api-foundations/
 
 # 3. For any phase folder:
@@ -246,14 +246,14 @@ extra steps — Phase 07 needs a GPU/Colab, Phase 08 has a Docker option).
 
 | Phase | Project | Try it |
 |---|---|---|
-| 01 | Universal LLM Client | `python demo.py` — see all 3 providers, streaming, and cost tracking side by side |
-| 02 | Structured Data Extractor | `python demo.py` — extract clean JSON from raw emails, job postings, articles |
-| 03 | Doc Chat with Memory | `python demo.py` — multi-turn Q&A over any PDF/text/URL with persistent memory |
-| 04 | RAG Document Q&A | `streamlit run app.py` — upload a PDF, ask questions, see cited sources |
-| 05 | AI Research Agent | `python demo.py` — watch an agent search, read, and write a structured report |
-| 06 | Multi-Agent Content Factory | `python demo.py` — one topic in, blog/LinkedIn/Twitter content out, in parallel |
-| 07 | Domain Expert Fine-tune | Run in Colab — fine-tune Llama-3-8B, evaluate vs base model |
-| 08 | Production AI Service | `docker-compose up` — a full containerized, observable AI backend + frontend |
+| 01 | Universal LLM Client | `python demo.py` - see all 3 providers, streaming, and cost tracking side by side |
+| 02 | Structured Data Extractor | `python demo.py` - extract clean JSON from raw emails, job postings, articles |
+| 03 | Doc Chat with Memory | `python demo.py` - multi-turn Q&A over any PDF/text/URL with persistent memory |
+| 04 | RAG Document Q&A | `streamlit run app.py` - upload a PDF, ask questions, see cited sources |
+| 05 | AI Research Agent | `python demo.py` - watch an agent search, read, and write a structured report |
+| 06 | Multi-Agent Content Factory | `python demo.py` - one topic in, blog/LinkedIn/Twitter content out, in parallel |
+| 07 | Domain Expert Fine-tune | Run in Colab - fine-tune Llama-3-8B, evaluate vs base model |
+| 08 | Production AI Service | `docker-compose up` - a full containerized, observable AI backend + frontend |
 
 ## Bonus: AI System Design for Interviews
 
@@ -261,35 +261,35 @@ Beyond the build-it phases, this repo includes a system design series for
 AI Engineer interviews specifically — the framework, trade-off vocabulary,
 and worked examples that come up in design rounds:
 
-- **Part 1 — Framework & Trade-off Vocabulary** *(available)*: the 7-step
+- **Part 1 - Framework & Trade-off Vocabulary** *(available)*: the 7-step
   interview framework, 8 core trade-off dimensions, latency/cost
   back-of-envelope math
-- **Part 2 — Architecture Pattern Library** *(available)*: the RAG
+- **Part 2 - Architecture Pattern Library** *(available)*: the RAG
   architecture spectrum (naive → advanced → agentic), agent/multi-agent
   patterns, caching architecture, safety/guardrail layers, the monitoring
   stack, and a combined reference architecture
-- Part 3 — Worked interview examples *(planned)*
-- Part 4 — Rapid-fire trade-off Q&A *(planned)*
+- Part 3 - Worked interview examples *(planned)*
+- Part 4 - Rapid-fire trade-off Q&A *(planned)*
 
 See `bonus-ai-system-design/`.
 
 ## Progress
 
 ```
-[x] Phase 00 — Part 1: Dev Environment & Tools
-[ ] Phase 00 — Part 2: Python Fundamentals I
-[ ] Phase 00 — Part 3: Python Fundamentals II
-[x] Phase 00 — Part 4: Command Line, APIs & the Web
-[x] Phase 00 — Part 5: Gentle AI Primer
-[x] Phase 00 — Part 6: Capstone Checkpoint
-[x] Phase 01 — LLM API Foundations
-[x] Phase 02 — Prompt Engineering
-[x] Phase 03 — LangChain & Orchestration
-[x] Phase 04 — RAG & Vector Databases
-[x] Phase 05 — AI Agents & LangGraph
-[x] Phase 06 — Multi-Agent Systems
-[x] Phase 07 — Fine-tuning & Customization
-[x] Phase 08 — Production & Deployment
+[x] Phase 0 - Part 1: Dev Environment & Tools
+[ ] Phase 0 - Part 2: Python Fundamentals I
+[ ] Phase 0 - Part 3: Python Fundamentals II
+[x] Phase 0 - Part 4: Command Line, APIs & the Web
+[x] Phase 0 - Part 5: Gentle AI Primer
+[x] Phase 0 - Part 6: Capstone Checkpoint
+[x] Phase 01 - LLM API Foundations
+[x] Phase 02 - Prompt Engineering
+[x] Phase 03 - LangChain & Orchestration
+[x] Phase 04 - RAG & Vector Databases
+[x] Phase 05 - AI Agents & LangGraph
+[x] Phase 06 - Multi-Agent Systems
+[x] Phase 07 - Fine-tuning & Customization
+[x] Phase 08 - Production & Deployment
 ```
 
 ## About
