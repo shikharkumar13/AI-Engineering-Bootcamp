@@ -6,7 +6,7 @@ Nine phases, nine working projects, zero hand-waving.
 
 Every phase ships two things: a full technical article (the theory, the
 trade-offs, the "why") and a tested, working project (the "how"). Nothing in
-this repo is pseudocode — every script here has actually been run.
+this repo is pseudocode: every script here has actually been run.
 
 ---
 
@@ -52,7 +52,7 @@ flowchart LR
 ```
 
 Each phase builds directly on the last. By Phase 08 you're not assembling
-toy demos anymore — you're wrapping a RAG pipeline in a FastAPI backend with
+toy demos anymore: you're wrapping a RAG pipeline in a FastAPI backend with
 authentication, rate limiting, Docker containers, automated RAGAS evaluation,
 and Langfuse observability, the same shape as a real production AI service.
 
@@ -60,15 +60,16 @@ and Langfuse observability, the same shape as a real production AI service.
 
 This curriculum has **two entry points**, depending on your background.
 
-**Track A — You already know ML/DL/transformers and little bit of development, but haven't built AI
-products.** Start at **Phase 01**. The roadmap assumes that theoretical
-foundation and goes straight into APIs, prompting, RAG, agents,
-fine-tuning, and production deployment.
+**Track A, for readers who already know ML/DL/transformers and have some
+development experience but haven't built AI products.** Start at
+**Phase 01**. The roadmap assumes that theoretical foundation and goes
+straight into APIs, prompting, RAG, agents, fine-tuning, and production
+deployment.
 
-**Track B — You're starting from zero.** No programming background, never
-used an IDE, never deployed anything. Start at **Phase 0**. It's a fully
-hand-held bridge covering dev environment setup, Python fundamentals,
-HTTP/APIs, and a no-math AI primer — specifically scoped to unblock
+**Track B, for readers starting from zero.** No programming background,
+never used an IDE, never deployed anything. Start at **Phase 0**. It's a
+fully hand-held bridge covering dev environment setup, Python fundamentals,
+HTTP/APIs, and a no-math AI primer, specifically scoped to unblock
 everything Phase 01 onward assumes you already know.
 
 ```
@@ -83,8 +84,8 @@ Know ML/DL and Development already?   ──────────────
 | Part | Topic | Status |
 |---|---|---|
 | 1 | Dev environment & tools - terminal, Python install, virtual environments, VS Code, Git & GitHub | ✅ |
-| 2 | Python fundamentals I - variables, data types, control flow, functions |
-| 3 | Python fundamentals II - classes, error handling, file I/O, type hints, decorators |
+| 2 | Python fundamentals I - variables, data types, control flow, functions | ✅ |
+| 3 | Python fundamentals II - classes, dataclasses, error handling, file I/O, type hints, decorators, context managers, generators, async/await | ✅ |
 | 4 | The command line, APIs & the web - HTTP, JSON, API keys, `.env` files, localhost/ports | ✅ |
 | 5 | A gentle, no-math AI primer - ML, neural networks, LLMs, tokens, embeddings | ✅ |
 | 6 | Capstone checkpoint - guided mini-project + full readiness checklist | ✅ |
@@ -118,7 +119,7 @@ Know ML/DL and Development already?   ──────────────
 
 Folders are named `Phase_N <Title>` (with spaces) on disk. Each phase pairs a
 topic-named article (the theory) with a small, runnable project (the
-practice) — there is no separate `ARTICLE.md`, the article *is* the
+practice); there is no separate `ARTICLE.md`, the article *is* the
 topic-named `.md` file.
 
 ```
@@ -132,7 +133,8 @@ AI-Engineering-Bootcamp/
 │   │   ├── cheatsheet.md
 │   │   └── check_setup.py
 │   ├── Part-2 & 3 Python Fundamentals/
-│   │   └── Python_fundamentals.md     ← scoped pointer to an external Python course
+│   │   ├── Python_fundamentals.md     ← in-repo article, scoped to this repo's own patterns
+│   │   └── fundamentals_demo.py       ← runnable companion script, stdlib only
 │   ├── Part-4 Command Line and APIs/
 │   │   ├── Command_line_APIs_the_Web.md
 │   │   ├── api_demo.py
@@ -225,6 +227,30 @@ AI-Engineering-Bootcamp/
 │   ├── requirements.txt
 │   └── .env.example
 │
+├── Project_1 Smart Inbox Triage/
+│   ├── README.md
+│   ├── triage.py                      ← imports Phase 1 + 2 code directly
+│   ├── demo.py
+│   ├── requirements.txt
+│   └── .env.example
+│
+├── Project_2 Research Copilot/
+│   ├── README.md
+│   ├── copilot_graph.py               ← imports Phase 3 + 4 + 5 code directly
+│   ├── demo.py
+│   ├── requirements.txt
+│   └── .env.example
+│
+├── Project_3 Autonomous Content Desk/
+│   ├── README.md
+│   ├── crew.py                        ← imports Phase 6 code, calls Phase 7 over HTTP
+│   ├── main.py
+│   ├── evaluation.py
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── requirements.txt
+│   └── .env.example
+│
 └── Bonus AI System Design/
     ├── framework_and_tradeoffs.md
     └── architecture_patterns.md
@@ -234,7 +260,7 @@ AI-Engineering-Bootcamp/
 
 ```bash
 # 1. Clone it
-git clone https://github.com/yourusername/AI-Engineering-Bootcamp.git
+git clone https://github.com/shikharkumar13/AI-Engineering-Bootcamp.git
 cd AI-Engineering-Bootcamp
 
 # 2. Pick your starting point
@@ -257,7 +283,7 @@ python demo.py
 ```
 
 Each phase's own `README.md` has the exact filenames and any phase-specific
-setup steps (Phase 07 needs a GPU/Colab, Phase 08 has a Docker option) — it's
+setup steps (Phase 07 needs a GPU/Colab, Phase 08 has a Docker option); it's
 the authoritative quick-start for that phase, more so than this table.
 
 ## Capstone Projects at a Glance
@@ -277,7 +303,7 @@ the authoritative quick-start for that phase, more so than this table.
 
 The phases above are practiced one at a time. These three combine adjacent
 phases into a single project each, so you get real end-to-end reps chaining
-skills together — the way a real feature actually needs them. Each imports
+skills together, the way a real feature actually needs them. Each imports
 the relevant phase's code directly rather than duplicating it, and increases
 in scope from the last.
 
@@ -290,16 +316,16 @@ in scope from the last.
 ## Bonus: AI System Design for Interviews
 
 Beyond the build-it phases, this repo includes a system design series for
-AI Engineer interviews specifically — the framework, trade-off vocabulary,
-and worked examples that come up in design rounds:
+AI Engineer interviews specifically: the framework, trade-off vocabulary,
+and worked examples that come up in design rounds.
 
 - **Part 1 - Framework & Trade-off Vocabulary** *(available)*: the 7-step
   interview framework, 8 core trade-off dimensions, latency/cost
-  back-of-envelope math — [`framework_and_tradeoffs.md`](Bonus%20AI%20System%20Design/framework_and_tradeoffs.md)
+  back-of-envelope math. See [`framework_and_tradeoffs.md`](Bonus%20AI%20System%20Design/framework_and_tradeoffs.md)
 - **Part 2 - Architecture Pattern Library** *(available)*: the RAG
   architecture spectrum (naive → advanced → agentic), agent/multi-agent
   patterns, caching architecture, safety/guardrail layers, the monitoring
-  stack, and a combined reference architecture — [`architecture_patterns.md`](Bonus%20AI%20System%20Design/architecture_patterns.md)
+  stack, and a combined reference architecture. See [`architecture_patterns.md`](Bonus%20AI%20System%20Design/architecture_patterns.md)
 - Part 3 - Worked interview examples *(planned)*
 - Part 4 - Rapid-fire trade-off Q&A *(planned)*
 
@@ -309,8 +335,8 @@ See `Bonus AI System Design/`.
 
 ```
 [x] Phase 0 - Part 1: Dev Environment & Tools
-[ ] Phase 0 - Part 2: Python Fundamentals I
-[ ] Phase 0 - Part 3: Python Fundamentals II
+[x] Phase 0 - Part 2: Python Fundamentals I
+[x] Phase 0 - Part 3: Python Fundamentals II
 [x] Phase 0 - Part 4: Command Line, APIs & the Web
 [x] Phase 0 - Part 5: Gentle AI Primer
 [x] Phase 0 - Part 6: Capstone Checkpoint
@@ -322,12 +348,16 @@ See `Bonus AI System Design/`.
 [x] Phase 06 - Multi-Agent Systems
 [x] Phase 07 - Fine-tuning & Customization
 [x] Phase 08 - Production & Deployment
+[x] Project 1 - Smart Inbox Triage
+[x] Project 2 - Research Copilot
+[x] Project 3 - Autonomous Content Desk
+[x] Bonus - AI System Design (Parts 1-2)
 ```
 
 ## About
 
 This roadmap was built progressively, phase by phase, combining ML/DL
-fundamentals with hands-on AI engineering practice — every project here was
+fundamentals with hands-on AI engineering practice. Every project here was
 actually run and tested, not just written.
 
 **Maintained by:** Kumar Shikhar
@@ -337,5 +367,5 @@ actually run and tested, not just written.
 
 ## License
 
-This project is licensed under the MIT License — feel free to use this
+This project is licensed under the MIT License. Feel free to use this
 curriculum structure for your own learning.
