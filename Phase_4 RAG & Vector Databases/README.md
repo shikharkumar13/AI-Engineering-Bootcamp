@@ -2,38 +2,43 @@
 
 ## What this project does
 A production-grade RAG pipeline that can answer questions over any PDF or text file with:
-- **Hybrid retrieval** — BM25 keyword search + vector semantic search, merged with RRF
-- **Cross-encoder re-ranking** — precise relevance scoring after initial retrieval
-- **HyDE** — generate a hypothetical answer first, search with that embedding
-- **Parent-child chunking** — index small chunks, return large chunks for context
-- **Source citations** — every claim references its source chunk
-- **Streamlit UI** — upload, chat, see sources in real-time
+- **Hybrid retrieval:** BM25 keyword search + vector semantic search, merged with RRF
+- **Cross-encoder re-ranking:** precise relevance scoring after initial retrieval
+- **HyDE:** generate a hypothetical answer first, search with that embedding
+- **Parent-child chunking:** index small chunks, return large chunks for context
+- **Source citations:** every claim references its source chunk
+- **Streamlit UI:** upload, chat, see sources in real-time
 
 ## Project structure
 ```
-phase04_project/
+Phase_4 RAG & Vector Databases/
 ├── rag_engine.py   ← Core RAG engine (the library)
 ├── app.py          ← Streamlit web UI
-├── phase04_demo.py         ← Terminal demos (no UI needed)
-└── phase04_requirements.txt
+├── demo.py         ← Terminal demos (no UI needed)
+├── requirements.txt
+└── .env.example    ← copy to .env and fill in your API key
 ```
 
 ## Quick start
 
 ### 1. Install
 ```bash
-pip install -r phase04_requirements.txt
+pip install -r requirements.txt
 ```
 Note: `sentence-transformers` downloads the embedding model (~130MB) on first run.
 
 ### 2. Configure .env
+```bash
+cp .env.example .env
+```
+`.env.example` contains:
 ```bash
 OPENAI_API_KEY=sk-...  # for LLM generation only; embeddings run locally
 ```
 
 ### 3. Run terminal demos
 ```bash
-python phase04_demo.py
+python demo.py
 ```
 
 ### 4. Run Streamlit UI

@@ -1,11 +1,11 @@
 # Phase 06 — Multi-Agent Systems
 
-> **Prerequisites:** Phases 01–05 complete. You can build a single LangGraph agent with
+> **Prerequisites:** Phases 01-05 complete. You can build a single LangGraph agent with
 > tools, memory, and human-in-the-loop approval.  
 > **What you'll learn:** CrewAI's agent/task/crew model; specialization patterns;
 > sequential vs parallel execution; how context passes between agents; lightweight
 > alternatives (OpenAI Swarm, Assistants API).  
-> **Project:** A Multi-Agent Content Factory — Researcher → Writer → Editor →
+> **Project:** A Multi-Agent Content Factory: Researcher → Writer → Editor →
 > Publisher, producing blog, LinkedIn, and Twitter content in parallel.
 
 ---
@@ -27,7 +27,7 @@
 
 ### 1.1 Where a single agent breaks down
 
-In Phase 05, you built one agent that could search, read, take notes, and report — all
+In Phase 05, you built one agent that could search, read, take notes, and report, all
 driven by a single system prompt. That works for a focused research task. But consider
 a content production pipeline:
 
@@ -45,10 +45,10 @@ problems:
 
 2. **Context bloat.** By the time the agent reaches the "format for Twitter" step,
    its context window is full of research notes, draft iterations, and editing
-   feedback — none of which is needed to write a 280-character tweet.
+   feedback, none of which is needed to write a 280-character tweet.
 
 3. **No natural checkpoints.** You cannot easily say "show me the draft before
-   formatting it for social media" — it's all one continuous trace.
+   formatting it for social media"; it's all one continuous trace.
 
 4. **No specialization-driven quality.** A "Senior Editor" persona genuinely produces
    different (often better) editing feedback than a generalist persona doing editing
@@ -72,7 +72,7 @@ coordinates how these agents pass work to each other.
 
 **From your ML/software background:** This is the same principle as microservices vs a
 monolith, or separation of concerns in software architecture. Each agent is a focused
-"function" with a clear contract — but the function is implemented by prompting an LLM
+"function" with a clear contract, but the function is implemented by prompting an LLM
 with a narrow role instead of writing imperative code.
 
 ---
@@ -111,14 +111,18 @@ LangGraph's flexibility for much faster setup of common patterns.
 ### 2.2 The Agent
 
 An `Agent` in CrewAI is defined by a **role**, a **goal**, and a **backstory**. These
-three fields are not just labels — they are concatenated into the system prompt the LLM
+three fields are not just labels: they are concatenated into the system prompt the LLM
 receives, exactly like the persona pattern from Phase 02.
 
-```python
-from crewai import Agent
-from langchain_openai import ChatOpenAI
+**Note on the `llm=` parameter:** CrewAI is built on LangChain concepts, but `Agent`'s
+`llm=` field expects CrewAI's own `LLM` class (or a plain model-name string like
+`"gpt-4o-mini"`), not a `langchain_openai.ChatOpenAI` instance: passing a LangChain
+chat model directly raises a Pydantic validation error.
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
+```python
+from crewai import Agent, LLM
+
+llm = LLM(model="gpt-4o-mini", temperature=0.3)
 
 researcher = Agent(
     role="Senior Research Analyst",
@@ -140,7 +144,7 @@ researcher = Agent(
 **Why role/goal/backstory matters:** Just as in Phase 02's persona pattern, these fields
 shape the tone, rigor, and focus of the agent's output. A "Senior Research Analyst" with
 a backstory emphasizing rigor will produce noticeably more careful, source-cited output
-than a generic "helpful assistant" — because the prompt activates a different region of
+than a generic "helpful assistant," because the prompt activates a different region of
 the model's learned behavior distribution.
 
 ```python
@@ -208,14 +212,14 @@ writing_task = Task(
 ```
 
 **The `context=[...]` parameter is the core mechanism for passing information between
-agents** — covered in depth in Section 5.
+agents**, covered in depth in Section 5.
 
 ---
 
 ### 2.4 The Crew
 
 A `Crew` brings agents and tasks together and executes them according to a process
-(sequential or hierarchical — covered in Section 4).
+(sequential or hierarchical, covered in Section 4).
 
 ```python
 from crewai import Crew, Process
@@ -250,12 +254,11 @@ for task_output in result.tasks_output:
 ### 2.5 A complete minimal example
 
 ```python
-from crewai import Agent, Task, Crew, Process
-from langchain_openai import ChatOpenAI
+from crewai import Agent, Task, Crew, Process, LLM
 from dotenv import load_dotenv
 
 load_dotenv()
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
+llm = LLM(model="gpt-4o-mini", temperature=0.3)
 
 researcher = Agent(
     role="Research Analyst",
@@ -362,7 +365,7 @@ perform the same work.
 ### 3.3 Tool specialization
 
 Just as roles should be focused, tool access should be focused. Give each agent only
-the tools relevant to its job — this both improves focus and reduces unnecessary cost
+the tools relevant to its job: this both improves focus and reduces unnecessary cost
 (unused tool schemas still consume tokens in every prompt).
 
 ```python
@@ -471,10 +474,9 @@ each task dynamically, rather than following a fixed order. This is useful when 
 right sequence of work is not known in advance.
 
 ```python
-from crewai import Crew, Process
-from langchain_openai import ChatOpenAI
+from crewai import Crew, Process, LLM
 
-manager_llm = ChatOpenAI(model="gpt-4o", temperature=0)  # often use a stronger model for managing
+manager_llm = LLM(model="gpt-4o", temperature=0)  # often use a stronger model for managing
 
 crew = Crew(
     agents=[researcher, writer, editor, fact_checker],
@@ -488,19 +490,19 @@ result = crew.kickoff(inputs={"topic": "AI regulation in the EU"})
 ```
 
 In hierarchical mode, the manager agent looks at the overall task, decides which
-specialist agent should act first, evaluates their output, and decides what to do next
-— potentially looping back to an agent multiple times. This is more flexible but also
+specialist agent should act first, evaluates their output, and decides what to do next,
+potentially looping back to an agent multiple times. This is more flexible but also
 less predictable and more expensive (the manager itself makes LLM calls to coordinate).
 
 **When to use hierarchical:** Open-ended tasks where the right sequence of specialist
-involvement cannot be predetermined — e.g., "produce a high-quality article" where the
+involvement cannot be predetermined, e.g. "produce a high-quality article" where the
 manager might decide the draft needs another research pass before editing.
 
 ---
 
 ### 4.3 True parallel execution
 
-Neither `sequential` nor `hierarchical` natively runs independent tasks in parallel —
+Neither `sequential` nor `hierarchical` natively runs independent tasks in parallel:
 they orchestrate one task at a time. For genuinely parallel work (e.g., formatting the
 same approved content for 3 different platforms simultaneously, where none depends on
 the others), you run separate crew/task executions concurrently using Python's
@@ -570,8 +572,8 @@ print(results["twitter"][:200])
 ```
 
 **Why this matters for production:** The research → write → edit phase is inherently
-sequential (each step needs the previous step's output). But the final formatting step
-— adapting the same approved content for 3 platforms — has no dependency between the
+sequential (each step needs the previous step's output). But the final formatting step,
+adapting the same approved content for 3 platforms, has no dependency between the
 three outputs. Running them in parallel cuts the formatting phase's latency by roughly
 3x, exactly like the async patterns from Phase 01.
 
@@ -654,8 +656,8 @@ editing_task = Task(
 
 **What actually happens internally:** CrewAI appends the referenced tasks' output text
 into the new task's prompt, formatted as additional context. This is conceptually
-identical to the `MessagesPlaceholder` pattern from Phase 03 — you are injecting prior
-results into a new prompt — but CrewAI automates the bookkeeping of which task's output
+identical to the `MessagesPlaceholder` pattern from Phase 03: you are injecting prior
+results into a new prompt, but CrewAI automates the bookkeeping of which task's output
 goes where.
 
 ---
@@ -665,7 +667,7 @@ goes where.
 There are two philosophies for inter-agent communication:
 
 **Explicit passing (CrewAI's default approach):** Each task explicitly declares which
-prior outputs it needs via `context=[...]`. This is predictable and easy to debug — you
+prior outputs it needs via `context=[...]`. This is predictable and easy to debug: you
 can always trace exactly what information reached each agent.
 
 **Shared state (LangGraph's approach for multi-agent graphs):** All agents read and
@@ -703,7 +705,7 @@ def editor_node(state: ContentPipelineState) -> dict:
 publish), CrewAI's explicit `context=[...]` is simpler and sufficiently clear. For
 pipelines with loops (e.g., "editor sends draft back to writer if quality is below
 threshold"), LangGraph's shared-state graph model with conditional edges is more
-natural — you've already learned this pattern in Phase 05.
+natural; you've already learned this pattern in Phase 05.
 
 ---
 
@@ -740,7 +742,7 @@ print(findings.confidence)
 ```
 
 This combines the reliability benefits of Phase 02's structured extraction with
-multi-agent orchestration — downstream agents (and your own code) get validated,
+multi-agent orchestration: downstream agents (and your own code) get validated,
 typed data instead of parsing free text.
 
 ---
@@ -781,8 +783,8 @@ independently of how content evolved.
 
 ### 6.1 When CrewAI/LangGraph are overkill
 
-CrewAI and LangGraph are full frameworks. For simpler handoff patterns — like "this
-agent decides whether to escalate to a different specialized agent" — a lighter-weight
+CrewAI and LangGraph are full frameworks. For simpler handoff patterns, like "this
+agent decides whether to escalate to a different specialized agent," a lighter-weight
 approach may be preferable, especially for learning the underlying mechanism or for
 projects that need minimal dependencies.
 
@@ -790,13 +792,14 @@ projects that need minimal dependencies.
 
 ### 6.2 OpenAI Swarm — minimal multi-agent handoffs
 
-Swarm (OpenAI's experimental, educational framework — since evolved into the
+Swarm (OpenAI's experimental, educational framework, since evolved into the
 **Agents SDK**) demonstrates multi-agent handoff with almost no abstraction. Its core
 idea: an agent's response can include a "handoff" to a different agent, which then
 takes over the conversation.
 
 ```python
-# pip install openai (Swarm's successor, the Agents SDK, ships as openai-agents)
+# pip install openai-agents   (the Agents SDK — Swarm's production successor,
+# released March 2025; Swarm itself is archived)
 # Conceptual example showing the handoff pattern:
 
 from dataclasses import dataclass
@@ -871,7 +874,7 @@ agent that hands off to a billing specialist agent when billing topics come up.
 ### 6.3 OpenAI Assistants API — managed multi-step agents
 
 The Assistants API is OpenAI's managed service for building agents without managing
-conversation state, tool execution loops, or memory yourself — OpenAI's servers handle
+conversation state, tool execution loops, or memory yourself: OpenAI's servers handle
 persistence and orchestration.
 
 ```python
@@ -923,12 +926,14 @@ if run.status == "completed":
 | Setup complexity | Low for single-agent use | Higher, but more control |
 | Best for | Quick prototypes, OpenAI-only products | Production multi-agent systems, multi-provider |
 
-> **Note on the Assistants API's status:** OpenAI has signaled the Assistants API will
-> be superseded by the newer **Responses API** combined with the **Agents SDK**, which
-> consolidate single-agent and multi-agent patterns into one interface. If building new
-> production systems on OpenAI's primitives directly (rather than LangGraph/CrewAI),
-> check OpenAI's current documentation for the latest recommended approach, since this
-> area has moved quickly.
+> **Note on the Assistants API's status:** OpenAI announced in August 2025 that the
+> Assistants API is deprecated, with a hard sunset date of **August 26, 2026**. After
+> that date, calls like the ones above stop working entirely, not just "not recommended."
+> It's being replaced by the **Responses API** combined with the **Conversations API**
+> and the **Agents SDK**, which consolidate single-agent and multi-agent patterns into
+> one interface. If you're building new production systems on OpenAI's primitives
+> directly (rather than LangGraph/CrewAI), use the Responses API, not the code above,
+> and check OpenAI's migration guide if you have an existing Assistants integration.
 
 ---
 
@@ -955,7 +960,7 @@ the final step parallelizes cleanly.
 
 2. **CrewAI's three primitives: Agent (who), Task (what), Crew (how they're
    orchestrated).** Role/goal/backstory shape behavior exactly like Phase 02's persona
-   pattern — write them as specific behavioral instructions, not vague labels.
+   pattern; write them as specific behavioral instructions, not vague labels.
 
 3. **Specify what an agent should NOT do, not just what it should do.** This is the
    single most effective technique for preventing role overlap between agents.
@@ -966,7 +971,7 @@ the final step parallelizes cleanly.
    which can then run in parallel.
 
 5. **`context=[task1, task2]` is explicit, traceable context passing.** Be deliberate
-   about what each task actually needs — passing every prior task's output to every
+   about what each task actually needs: passing every prior task's output to every
    subsequent task causes context bloat without benefit.
 
 6. **`output_pydantic` brings Phase 02's structured extraction into multi-agent
@@ -1010,6 +1015,6 @@ misrouted. Test with 5 different support messages covering different categories.
 
 ---
 
-*Next: Phase 07 — Fine-tuning & Customization*  
+*Next: Phase 07, Fine-tuning & Customization*  
 *You will learn when prompting and RAG aren't enough, and how to adapt open-source
 models to your domain using LoRA and QLoRA.*

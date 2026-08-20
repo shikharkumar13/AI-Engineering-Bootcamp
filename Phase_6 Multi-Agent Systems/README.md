@@ -19,23 +19,28 @@ Researcher → Writer → Editor → ┬─► Blog Formatter
 
 ## Project structure
 ```
-phase06_project/
+Phase_6 Multi-Agent Systems/
 ├── agents.py            ← 6 agent definitions (role/goal/backstory)
 ├── tasks.py              ← Task definitions with context-passing wiring
-├── phase06_tools.py       ← search_tool, character_counter, hashtag_generator
+├── tools.py               ← search_tool, character_counter, hashtag_generator
 ├── content_factory.py     ← ContentFactory orchestrator (sequential + parallel)
-├── phase06_demo.py        ← 6 demos
-└── phase06_requirements.txt
+├── demo.py                ← 6 demos
+├── requirements.txt
+└── .env.example           ← copy to .env and fill in your keys
 ```
 
 ## Quick start
 
 ### 1. Install
 ```bash
-pip install -r phase06_requirements.txt
+pip install -r requirements.txt
 ```
 
 ### 2. Configure .env
+```bash
+cp .env.example .env
+```
+`.env.example` contains:
 ```bash
 OPENAI_API_KEY=sk-...
 TAVILY_API_KEY=tvly-...    # free tier at https://tavily.com
@@ -43,7 +48,7 @@ TAVILY_API_KEY=tvly-...    # free tier at https://tavily.com
 
 ### 3. Run
 ```bash
-python phase06_demo.py
+python demo.py
 ```
 
 ## API reference
@@ -87,8 +92,8 @@ result.pretty_print()  # formatted console output
 
 ## Why sequential THEN parallel
 
-Research → Write → Edit is inherently sequential — you cannot write before
+Research → Write → Edit is inherently sequential: you cannot write before
 researching, cannot edit before writing. But once the article is edited and
 approved, formatting it for 3 different platforms has **no dependency between
-the three outputs** — so `content_factory.py` runs that phase with
+the three outputs**, so `content_factory.py` runs that phase with
 `asyncio.gather()`, cutting formatting time by roughly 3x (see Demo 4).

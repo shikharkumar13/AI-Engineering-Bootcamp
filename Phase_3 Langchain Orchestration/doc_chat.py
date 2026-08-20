@@ -27,7 +27,10 @@ from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-# Loaders — each handles a different source type
+# Loaders — each handles a different source type.
+# langchain-community is being sunset upstream in favor of standalone integration
+# packages; these imports still work today and emit a DeprecationWarning, similar
+# to the google-generativeai situation noted for Phase 01.
 from langchain_community.document_loaders import (
     TextLoader,
     PyPDFLoader,
@@ -171,7 +174,7 @@ class DocChat:
         if source.startswith(("http://", "https://")):
             return "url"
         ext = Path(source).suffix.lower()
-        return {"pdf": "pdf", ".csv": "csv"}.get(ext, "text")
+        return {".pdf": "pdf", ".csv": "csv"}.get(ext, "text")
 
     # ── LCEL chain construction ────────────────────────────────────────────────
 
@@ -204,7 +207,11 @@ class DocChat:
         # Step 3: Base chain (no memory yet)
         base_chain = inject_context | prompt | self._llm | self._parser
 
-        # Step 4: Wrap with memory management
+        # Step 4: Wrap with memory management.
+        # LangChain has since deprecated RunnableWithMessageHistory in favor of
+        # LangGraph's built-in persistence (a LangChainDeprecationWarning on
+        # construction is expected). It still works, and is used here
+        # deliberately: LangGraph is the subject of Phase 05, not this phase.
         return RunnableWithMessageHistory(
             base_chain,
             self._get_session_history,

@@ -1,6 +1,6 @@
 # Phase 05 — AI Agents & LangGraph
 
-> **Prerequisites:** Phases 01–04 complete. You can call LLMs, engineer prompts, build
+> **Prerequisites:** Phases 01-04 complete. You can call LLMs, engineer prompts, build
 > LangChain pipelines, and implement RAG.  
 > **What you'll learn:** The ReAct pattern; building and registering tools; LangGraph's
 > graph-based agent model; human-in-the-loop workflows; debugging and evaluating agents.  
@@ -36,16 +36,16 @@ This works when the answer lives entirely in your indexed documents. But conside
 requests:
 
 - "What's the weather in Tokyo right now, and should I pack an umbrella for my trip
-  next week?" — needs a live weather API, not a static document
+  next week?" (needs a live weather API, not a static document)
 - "Find the three highest-rated Python web frameworks released in the last year and
-  compare their GitHub star counts" — needs web search AND multiple lookups
-- "Debug this error message, try a fix, run the tests, and tell me if it passes" —
-  needs code execution and a feedback loop based on the result
-- "Research this topic across multiple sources and write me a report" — needs several
-  rounds of searching, reading, and synthesizing
+  compare their GitHub star counts" (needs web search AND multiple lookups)
+- "Debug this error message, try a fix, run the tests, and tell me if it passes"
+  (needs code execution and a feedback loop based on the result)
+- "Research this topic across multiple sources and write me a report" (needs several
+  rounds of searching, reading, and synthesizing)
 
 None of these fit the retrieve-once-generate-once pattern. They require the model to
-**decide what action to take next based on what happened previously** — potentially many
+**decide what action to take next based on what happened previously**, potentially many
 times in a row, using different tools, until the task is actually complete.
 
 ---
@@ -73,7 +73,7 @@ An agent is an LLM wrapped in a loop with access to tools, where the LLM decides
 
 This is fundamentally different from Phase 02's function calling, where the model
 generated arguments once and your code used them once. Here, the model calls a tool,
-sees the result, and decides what to do *next* — potentially calling more tools, in a
+sees the result, and decides what to do *next*, potentially calling more tools, in a
 loop, until it has enough information.
 
 **From your ML background:** Think of this as analogous to an RL agent's
@@ -129,9 +129,9 @@ happened before.
 This connects directly to Chain-of-Thought from Phase 02. By forcing the model to write
 its reasoning before choosing an action, you get:
 
-1. **Better tool selection** — the model reasons about which tool fits before picking one
-2. **Debuggability** — you can read the Thought to understand *why* the model did something
-3. **Error recovery** — if an Observation reveals a mistake, the next Thought can correct course
+1. **Better tool selection:** the model reasons about which tool fits before picking one
+2. **Debuggability:** you can read the Thought to understand *why* the model did something
+3. **Error recovery:** if an Observation reveals a mistake, the next Thought can correct course
 
 ```python
 # Example of a full ReAct trace for: "What is the population of the capital of France?"
@@ -265,13 +265,13 @@ print(f"\nFINAL: {answer}")
 ```
 
 **What this manual loop demonstrates:**
-- The "Action" is just structured text the model generates — same idea as function
+- The "Action" is just structured text the model generates, the same idea as function
   calling from Phase 02, but here it loops
 - Your code is responsible for parsing the action, executing it, and feeding the
   observation back
 - The `stop=["Observation:"]` parameter prevents the model from hallucinating fake
-  tool results — critical, otherwise the model might "imagine" an Observation instead
-  of waiting for the real one
+  tool results. This is critical: otherwise the model might "imagine" an Observation
+  instead of waiting for the real one
 
 ---
 
@@ -359,7 +359,7 @@ print(answer)
 ```
 
 **Why this is more reliable than text-parsing ReAct:** The model is constrained by the
-function calling schema to produce valid JSON arguments — no regex parsing, no malformed
+function calling schema to produce valid JSON arguments: no regex parsing, no malformed
 text, no hallucinated formats. This is the foundation that LangGraph's `ToolNode` uses
 internally.
 
@@ -408,7 +408,7 @@ print(web_search.description)  # → "Search the web for current information..."
 print(web_search.args)         # → {'query': {'title': 'Query', 'type': 'string'}}
 ```
 
-**The docstring is not documentation — it is the tool's description sent to the LLM.**
+**The docstring is not documentation: it is the tool's description sent to the LLM.**
 The model decides whether and how to use a tool based entirely on its name, docstring,
 and argument schema. Write docstrings as if you are instructing a new employee on when
 to use this specific tool.
@@ -447,7 +447,7 @@ print(get_weather.args)
 
 ### 3.3 Real-world tool: Tavily web search
 
-Tavily is a search API purpose-built for LLM agents — it returns clean, summarized
+Tavily is a search API purpose-built for LLM agents: it returns clean, summarized
 results instead of raw HTML, which dramatically reduces the tokens needed and improves
 result quality.
 
@@ -546,8 +546,8 @@ def fetch_page_content(url: str) -> str:
 ### 3.5 Tool: code execution (sandboxed)
 
 For agents that need to run code (data analysis, calculations, generated scripts),
-never use raw `exec()` — execute in an isolated sandbox. E2B is a managed sandbox
-service designed for this.
+never use raw `exec()`; execute in an isolated sandbox instead. E2B is a managed
+sandbox service designed for this.
 
 ```bash
 pip install e2b-code-interpreter
@@ -592,7 +592,7 @@ print(result)  # → "STDOUT:\nMean: 36.2"
 
 **Why sandboxing matters:** If your agent generates code based on LLM output (which can
 be influenced by untrusted input, e.g., content scraped from a webpage), executing it
-directly on your machine is a critical security risk — prompt injection in fetched
+directly on your machine is a critical security risk: prompt injection in fetched
 content could instruct the model to generate malicious code. A sandbox isolates execution
 from your host system.
 
@@ -617,7 +617,7 @@ print(response.tool_calls)
 # → [{'name': 'tavily_search', 'args': {'query': 'latest Python version'}, 'id': 'call_abc123'}]
 ```
 
-This is the building block LangGraph uses internally — but LangGraph manages the full
+This is the building block LangGraph uses internally, but LangGraph manages the full
 loop (calling tools, feeding results back, deciding when to stop) for you.
 
 ---
@@ -800,7 +800,7 @@ for chunk in graph.stream({
 ### 4.5 Adding custom routing logic
 
 Beyond the standard ReAct loop, LangGraph lets you add custom conditional edges for
-more sophisticated control flow — for example, retry logic or routing to specialized
+more sophisticated control flow, for example retry logic or routing to specialized
 sub-agents based on the type of question.
 
 ```python
@@ -837,7 +837,7 @@ builder.add_conditional_edges(
 
 LangGraph's `MemorySaver` (or persistent checkpointers for production) automatically
 saves the state after each node execution, allowing conversations to persist across
-multiple `invoke()` calls — and even across process restarts with persistent backends.
+multiple `invoke()` calls, and even across process restarts with persistent backends.
 
 ```python
 from langgraph.checkpoint.memory import MemorySaver
@@ -988,7 +988,7 @@ on temperature, model version, or even random variation. You need to observe:
 - What each tool returned
 - How many steps the agent took before answering
 - Whether it got stuck in a loop (calling the same tool repeatedly with similar args)
-- The token cost of the full trace (agents can be expensive — many LLM calls per task)
+- The token cost of the full trace (agents can be expensive: many LLM calls per task)
 
 ---
 
@@ -1118,7 +1118,7 @@ Evaluating agents is harder than evaluating a single LLM call because correctnes
 depends on the whole trajectory, not just the final text. Three useful evaluation
 dimensions:
 
-**1. Task success rate** — did the agent achieve the goal?
+**1. Task success rate:** did the agent achieve the goal?
 ```python
 def evaluate_task_success(question: str, expected_answer_contains: list[str]) -> bool:
     """Simple evaluation: does the final answer mention the expected key facts?"""
@@ -1135,7 +1135,7 @@ passed = sum(evaluate_task_success(q, exp) for q, exp in test_cases)
 print(f"Passed: {passed}/{len(test_cases)}")
 ```
 
-**2. Tool efficiency** — how many steps/tool calls did it take?
+**2. Tool efficiency:** how many steps/tool calls did it take?
 ```python
 def count_tool_calls(result: dict) -> int:
     return sum(
@@ -1146,7 +1146,7 @@ def count_tool_calls(result: dict) -> int:
 # Fewer tool calls for the same correct answer = more efficient agent
 ```
 
-**3. Cost per task** — what did this trajectory cost in tokens?
+**3. Cost per task:** what did this trajectory cost in tokens?
 ```python
 def estimate_trajectory_cost(result: dict, cost_per_1k_input=0.00015, cost_per_1k_output=0.0006) -> float:
     # In production, sum actual usage from each LLM call's response metadata
@@ -1173,7 +1173,7 @@ def estimate_trajectory_cost(result: dict, cost_per_1k_input=0.00015, cost_per_1
    is fragile. Always prefer function calling when available.
 
 4. **A tool is a docstring + a function.** The LLM decides whether and how to use a
-   tool based entirely on its name, docstring, and argument schema — write these as
+   tool based entirely on its name, docstring, and argument schema; write these as
    instructions to the model, not just code comments.
 
 5. **LangGraph models agents as graphs: State + Nodes + Edges.** `StateGraph` with a
@@ -1186,7 +1186,7 @@ def estimate_trajectory_cost(result: dict, cost_per_1k_input=0.00015, cost_per_1
 
 7. **Agents need different debugging tools than chains.** Track the full trajectory
    (tool calls, arguments, observations), guard against infinite loops with step limits
-   and repeat detection, and evaluate based on task success + efficiency + cost — not
+   and repeat detection, and evaluate based on task success + efficiency + cost, not
    just whether the final text looks reasonable.
 
 ---
@@ -1218,6 +1218,6 @@ question that might confuse a naive agent.
 
 ---
 
-*Next: Phase 06 — Multi-Agent Systems*  
+*Next: Phase 06, Multi-Agent Systems*  
 *You will orchestrate teams of specialized agents (researcher, writer, editor) that
 collaborate on tasks too complex for a single agent to handle well alone.*

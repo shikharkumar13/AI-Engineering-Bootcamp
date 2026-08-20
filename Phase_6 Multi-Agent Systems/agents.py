@@ -8,18 +8,19 @@ Five specialized agents, each with a focused role/goal/backstory:
   - BlogFormatter, LinkedInFormatter, TwitterFormatter: platform-specific output
 """
 
-from crewai import Agent
-from langchain_openai import ChatOpenAI
+from crewai import Agent, LLM
 from dotenv import load_dotenv
 
-from phase06_tools import search_tool, character_counter, hashtag_generator
+from tools import search_tool, character_counter, hashtag_generator
 
 load_dotenv()
 
 # Two LLM configs — a slightly higher temperature for creative roles (writer, formatters),
-# lower temperature for roles needing precision (researcher, editor)
-precise_llm  = ChatOpenAI(model="gpt-4o-mini", temperature=0.1)
-creative_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.5)
+# lower temperature for roles needing precision (researcher, editor).
+# Agent(llm=...) needs crewai's own LLM class (or a plain model-name string) — it does
+# not accept a langchain_openai.ChatOpenAI instance.
+precise_llm  = LLM(model="gpt-4o-mini", temperature=0.1)
+creative_llm = LLM(model="gpt-4o-mini", temperature=0.5)
 
 
 # ── Researcher ──────────────────────────────────────────────────────────────────

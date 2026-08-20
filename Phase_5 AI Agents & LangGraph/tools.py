@@ -5,6 +5,8 @@ Each tool is decorated with @tool, giving the LLM a name, description,
 and argument schema it can use to decide when and how to call it.
 """
 
+import ast
+import operator
 import os
 import httpx
 from bs4 import BeautifulSoup
@@ -119,6 +121,38 @@ def fetch_page_content(url: str, max_chars: int = 4000) -> str:
 
 # ── Calculator ──────────────────────────────────────────────────────────────────
 
+# Fallback arithmetic evaluator used only if numexpr isn't installed. This is NOT
+# a bare eval() — eval() with stripped __builtins__ is a well-known non-sandbox
+# (subclass-walking tricks like ().__class__.__bases__ can still reach arbitrary
+# code), which matters here because `expression` can be influenced by whatever
+# the agent read off the web. This walks the parsed AST and only ever evaluates
+# numeric literals combined with a fixed set of arithmetic operators — no name
+# lookups, no attribute access, no calls are reachable at all.
+_SAFE_OPERATORS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+    ast.USub: operator.neg,
+    ast.UAdd: operator.pos,
+}
+
+
+def _safe_arithmetic_eval(node: ast.AST):
+    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+        return node.value
+    if isinstance(node, ast.BinOp) and type(node.op) in _SAFE_OPERATORS:
+        return _SAFE_OPERATORS[type(node.op)](
+            _safe_arithmetic_eval(node.left), _safe_arithmetic_eval(node.right)
+        )
+    if isinstance(node, ast.UnaryOp) and type(node.op) in _SAFE_OPERATORS:
+        return _SAFE_OPERATORS[type(node.op)](_safe_arithmetic_eval(node.operand))
+    raise ValueError(f"Unsupported expression syntax: {ast.dump(node)}")
+
+
 @tool
 def calculator(expression: str) -> str:
     """Evaluate a mathematical expression and return the numeric result.
@@ -134,10 +168,10 @@ def calculator(expression: str) -> str:
         result = numexpr.evaluate(expression).item()
         return str(result)
     except ImportError:
-        # Fallback to restricted eval if numexpr isn't installed
+        # Fallback if numexpr isn't installed — see _safe_arithmetic_eval above
         try:
-            allowed = {"__builtins__": {}}
-            result = eval(expression, allowed, {})
+            tree = ast.parse(expression, mode="eval")
+            result = _safe_arithmetic_eval(tree.body)
             return str(result)
         except Exception as e:
             return f"Error evaluating expression: {e}"

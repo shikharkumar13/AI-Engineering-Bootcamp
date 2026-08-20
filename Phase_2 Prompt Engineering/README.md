@@ -7,18 +7,20 @@ LLMs + Pydantic + instructor.
 
 ## Project structure
 ```
-phase02_project/
+Phase_2 Prompt Engineering/
 ├── models.py      ← Pydantic models for each document type
 ├── extractor.py   ← DataExtractor class (the library)
-├── phase02_demo.py        ← All demos
-└── phase02_requirements.txt
+├── demo.py        ← All demos
+├── requirements.txt
+└── .env.example   ← copy to .env and fill in your API key
 ```
 
 ## Quick start
 
 ```bash
-pip install -r phase02_requirements.txt
-python phase02_demo.py
+pip install -r requirements.txt
+cp .env.example .env   # fill in OPENAI_API_KEY
+python demo.py
 ```
 
 ## API reference
@@ -34,6 +36,7 @@ email_data   = extractor.extract_email(email_text)
 job_data     = extractor.extract_job_posting(job_text)
 article_data = extractor.extract_news_article(article_text)
 notes_data   = extractor.extract_meeting_notes(notes_text)
+receipt_data = extractor.extract_receipt(receipt_text)
 
 # Access fields as Python objects (not dicts)
 print(email_data.priority)      # Priority.HIGH
@@ -67,6 +70,7 @@ results = extractor.batch_extract([text1, text2, text3], EmailData)
 | Demo 3 | Job posting with type coercion and enums |
 | Demo 4 | News article with Chain-of-Thought |
 | Demo 5 | Meeting notes with complex nested structures |
-| Demo 6 | Auto document-type detection |
-| Demo 7 | Raw function calling vs instructor comparison |
-| Demo 8 | Batch extraction with error handling |
+| Demo 6 | Receipt extraction with numeric line items |
+| Demo 7 | Auto document-type detection |
+| Demo 8 | Raw function calling vs instructor comparison |
+| Demo 9 | Batch extraction with error handling |

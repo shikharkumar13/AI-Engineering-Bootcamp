@@ -5,7 +5,9 @@ A single class that wraps OpenAI, Claude, and Gemini with:
   - Unified interface across all providers
   - Streaming support
   - Token counting and cost tracking
-  - Automatic retry with exponential backoff
+  - Automatic retry with exponential backoff (OpenAI and Claude calls; the
+    google-generativeai SDK exposes a different exception hierarchy and
+    isn't wired into this retry path)
   - Async parallel calls
   - Multi-provider fallback
 
@@ -24,7 +26,12 @@ from dataclasses import dataclass, field
 from dotenv import load_dotenv
 
 from openai import OpenAI, AsyncOpenAI, RateLimitError, APIConnectionError
-from anthropic import Anthropic, AsyncAnthropic
+from anthropic import (
+    Anthropic,
+    AsyncAnthropic,
+    RateLimitError as AnthropicRateLimitError,
+    APIConnectionError as AnthropicAPIConnectionError,
+)
 import google.generativeai as genai
 import tiktoken
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
@@ -47,18 +54,21 @@ class Provider(Enum):
 # Default model per provider — change these to your preference
 DEFAULT_MODELS = {
     Provider.OPENAI: "gpt-4o-mini",
-    Provider.CLAUDE: "claude-3-5-haiku-20241022",
-    Provider.GEMINI: "gemini-1.5-flash",
+    Provider.CLAUDE: "claude-haiku-4-5-20251001",
+    Provider.GEMINI: "gemini-2.5-flash",
 }
 
-# Pricing: USD per 1 million tokens
+# Pricing: USD per 1 million tokens — verify current numbers on each
+# provider's pricing page before relying on these for real budgeting;
+# providers revise pricing and retire model IDs without much notice.
 PRICING = {
     "gpt-4o":                        {"input": 5.00,   "output": 15.00},
     "gpt-4o-mini":                   {"input": 0.15,   "output": 0.60},
-    "claude-3-5-sonnet-20241022":    {"input": 3.00,   "output": 15.00},
-    "claude-3-5-haiku-20241022":     {"input": 0.80,   "output": 4.00},
-    "gemini-1.5-flash":              {"input": 0.075,  "output": 0.30},
-    "gemini-1.5-pro":                {"input": 3.50,   "output": 10.50},
+    "claude-opus-5":                 {"input": 5.00,   "output": 25.00},
+    "claude-sonnet-5":               {"input": 2.00,   "output": 10.00},
+    "claude-haiku-4-5-20251001":     {"input": 1.00,   "output": 5.00},
+    "gemini-2.5-flash":              {"input": 0.30,   "output": 2.50},
+    "gemini-2.5-pro":                {"input": 1.25,   "output": 10.00},
 }
 
 
@@ -319,6 +329,11 @@ class LLMClient:
             cost_usd=_calc_cost(model, in_tok, out_tok), latency_s=0,
         )
 
+    @retry(
+        retry=retry_if_exception_type((AnthropicRateLimitError, AnthropicAPIConnectionError)),
+        wait=wait_exponential(multiplier=1, min=1, max=60),
+        stop=stop_after_attempt(5),
+    )
     def _claude_call(self, prompt, system, model, max_tokens, temperature, stream) -> LLMResponse:
         if stream:
             print(f"[{model}] ", end="")

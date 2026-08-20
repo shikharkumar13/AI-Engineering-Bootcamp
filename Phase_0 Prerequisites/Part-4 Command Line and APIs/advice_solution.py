@@ -1,4 +1,4 @@
-# phase00_part4_advice_solution.py
+# advice_solution.py
 #
 # A worked solution to the Section 9 checkpoint project.
 # Try writing your own version FIRST — this is here to check your work

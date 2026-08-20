@@ -33,22 +33,22 @@ size and capability. But consider the scale gap:
 | LLaMA 3 (8B) | 8B | ~16 GB |
 | LLaMA 3 (70B) | 70B | ~140 GB |
 | GPT-4o | ~200B (estimated) | ~400 GB |
-| Claude 3.5 Sonnet | Undisclosed | Anthropic's infrastructure |
+| Claude Sonnet 5 | Undisclosed | Anthropic's infrastructure |
 
-The models that actually perform well in production — GPT-4o, Claude 3.5 Sonnet, Gemini
-1.5 Pro — are either too large to run locally or are entirely proprietary. You cannot
+The models that actually perform well in production (GPT-4o, Claude Sonnet 5, Gemini
+2.5 Pro) are either too large to run locally or are entirely proprietary. You cannot
 download them. The only way to use them is through their APIs.
 
 **What an LLM API actually is:**  
-It is the same neural network you already understand — transformer with attention,
-embedding layers, softmax output — except it is already trained, already deployed on
+It is the same neural network you already understand: transformer with attention,
+embedding layers, softmax output, except it is already trained, already deployed on
 clusters of H100s, and sitting behind an HTTP endpoint. Your code sends text in, text
 comes back. You pay per token. No GPU required on your side.
 
 **Why this matters for AI engineering:**  
 The skill of an AI engineer is not retraining these models from scratch. It is knowing
 how to call them effectively, combine them with tools and data, and ship products around
-them. Everything in this roadmap — RAG, agents, fine-tuning — sits on top of the
+them. Everything in this roadmap (RAG, agents, fine-tuning) sits on top of the
 foundation you are building right now.
 
 ---
@@ -74,7 +74,12 @@ minutes and runs up thousands of dollars in API charges on your account.
 pip install openai anthropic google-generativeai python-dotenv httpx tenacity tiktoken
 ```
 
-Create a `.env` file in your project root:
+Copy the provided `.env.example` to `.env` and fill in your real keys. Never commit
+`.env` itself:
+
+```bash
+cp .env.example .env
+```
 
 ```bash
 # .env — NEVER commit this file
@@ -95,7 +100,7 @@ __pycache__/
 
 ### 2.3 Why python-dotenv?
 
-`python-dotenv` reads your `.env` file and loads its contents into `os.environ` — the
+`python-dotenv` reads your `.env` file and loads its contents into `os.environ`, the
 dictionary Python uses to store environment variables. After calling `load_dotenv()`,
 you can access your keys via `os.getenv("OPENAI_API_KEY")`. The SDK clients do this
 automatically, so you rarely need to pass the key explicitly.
@@ -114,8 +119,9 @@ key = os.getenv("OPENAI_API_KEY")  # now available everywhere
 A clean structure for Phase 01 work:
 
 ```
-phase01/
+Phase_1 LLM APIs/
 ├── .env                  ← API keys (never committed)
+├── .env.example          ← template you copy to .env
 ├── .gitignore            ← includes .env
 ├── requirements.txt      ← pip dependencies
 ├── llm_client.py         ← your universal client (the project)
@@ -202,7 +208,7 @@ There are three roles:
 | `user` | The person using your app | The actual questions or instructions being sent |
 | `assistant` | The model's previous replies | Previous turns in the conversation |
 
-**Critical insight — models are stateless:**  
+**Critical insight: models are stateless.**  
 The model has no memory between API calls. It does not remember your previous message.
 Every time you call the API, you send the *entire* conversation history. The model reads
 all messages from the top, then generates the next assistant reply.
@@ -230,7 +236,7 @@ history.append({"role": "assistant", "content": response})
 
 From your ML background: the model attends over all tokens in the messages list. The
 context window limit (discussed in Section 5) is the maximum number of tokens the model
-can process in a single forward pass — which includes all messages you send.
+can process in a single forward pass, which includes all messages you send.
 
 ---
 
@@ -280,8 +286,8 @@ def call_openai(prompt: str, system: str = "You are a helpful assistant.") -> st
 Temperature controls how the model samples from its output probability distribution.
 At temperature 0, it always picks the highest-probability token (greedy decoding). At
 temperature 1, it samples according to the raw probabilities. Higher values make the
-distribution flatter, producing more surprising outputs. For factual tasks use 0–0.3;
-for creative tasks use 0.7–1.0.
+distribution flatter, producing more surprising outputs. For factual tasks use 0-0.3;
+for creative tasks use 0.7-1.0.
 
 **About `max_tokens`:**  
 This caps how many tokens the model generates. If the model reaches this limit, it stops
@@ -306,7 +312,7 @@ def call_claude(prompt: str, system: str = "You are a helpful assistant.") -> st
     # It is a top-level parameter, not a message with role="system".
     
     response = client_anthropic.messages.create(
-        model="claude-3-5-haiku-20241022",  # cheapest Claude model
+        model="claude-haiku-4-5-20251001",  # cheapest current Claude model
         max_tokens=300,                     # REQUIRED for Claude — not optional
         system=system,                      # ← separate parameter, not in messages
         messages=[
@@ -345,7 +351,7 @@ def call_gemini(prompt: str, system: str = "You are a helpful assistant.") -> st
     
     # Gemini requires creating a model object first
     model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",   # fast and cheap; generous free tier
+        model_name="gemini-2.5-flash",   # fast and cheap; generous free tier
         system_instruction=system         # Gemini calls it system_instruction
     )
     
@@ -406,8 +412,8 @@ The user sees text appearing almost immediately, which makes the application fee
 dramatically more responsive even though the total time is the same.
 
 **From your ML background:** Autoregressive generation already produces tokens one at a
-time — the model samples one token, appends it to the context, runs another forward pass,
-samples the next token. Streaming simply forwards each token to the client as it is
+time: the model samples one token, appends it to the context, runs another forward pass,
+then samples the next token. Streaming simply forwards each token to the client as it is
 generated, instead of buffering them all and sending at the end.
 
 ---
@@ -470,7 +476,7 @@ def claude_stream(prompt: str) -> str:
     
     # The 'with' block ensures the connection is properly closed when done
     with client_anthropic.messages.stream(
-        model="claude-3-5-haiku-20241022",
+        model="claude-haiku-4-5-20251001",
         max_tokens=300,
         messages=[{"role": "user", "content": prompt}]
     ) as stream:
@@ -574,12 +580,14 @@ Some examples with GPT-4o tokenization:
 ```
 "Hello"             →  1 token   ["Hello"]
 "hello"             →  1 token   ["hello"]
-"extraordinary"     →  1 token   ["extraordinary"]
-"backpropagation"   →  2 tokens  ["backprop", "agation"]
-"ChatGPT"           →  3 tokens  ["Chat", "G", "PT"]
+"extraordinary"     →  2 tokens  ["extra", "ordinary"]
+"backpropagation"   →  3 tokens  ["back", "prop", "agation"]
+"ChatGPT"           →  2 tokens  ["Chat", "GPT"]
 " the"              →  1 token   [" the"]  ← space is part of the token
-"100,000"           →  4 tokens  ["100", ",", "000"]
+"100,000"           →  3 tokens  ["100", ",", "000"]
 ```
+(counts above are from `tiktoken.encoding_for_model("gpt-4o-mini")`. Run it yourself and
+you'll see splits like this vary by model family, so always measure rather than guess.)
 
 **Rule of thumb:** approximately 4 characters = 1 token, or about ¾ of an English word
 per token. So:
@@ -597,17 +605,17 @@ send) and output (what the model generates). Output tokens typically cost more b
 generation is more compute-intensive than encoding.
 
 **Context window:** This is the maximum number of tokens the model can process in a
-single call. It is the model's "working memory" — the maximum size of the sequence it
+single call. It is the model's "working memory": the maximum size of the sequence it
 can attend over.
 
 | Model | Context Window | Approximate Word Limit |
 |---|---|---|
 | gpt-4o-mini | 128,000 tokens | ~96,000 words |
 | gpt-4o | 128,000 tokens | ~96,000 words |
-| claude-3-5-haiku | 200,000 tokens | ~150,000 words |
-| claude-3-5-sonnet | 200,000 tokens | ~150,000 words |
-| gemini-1.5-flash | 1,000,000 tokens | ~750,000 words |
-| gemini-1.5-pro | 2,000,000 tokens | ~1,500,000 words |
+| claude-haiku-4-5 | 200,000 tokens | ~150,000 words |
+| claude-sonnet-5 | 200,000 tokens | ~150,000 words |
+| gemini-2.5-flash | 1,000,000 tokens | ~750,000 words |
+| gemini-2.5-pro | 1,000,000 tokens | ~750,000 words |
 
 The context window limit applies to the **total** of your input tokens plus the model's
 output tokens. If you have a 128k context window and you send 100k tokens of input, the
@@ -615,16 +623,22 @@ model can only generate up to 28k tokens of output.
 
 ---
 
-### 5.3 Pricing (approximate, as of late 2024)
+### 5.3 Pricing (approximate; check each provider's pricing page before budgeting)
+
+Providers revise pricing and retire model IDs on their own schedule, often faster than a
+document like this one gets updated. Treat the numbers below as illustrative of *relative*
+cost (mini/flash/haiku tiers are roughly 10-20x cheaper than their flagship siblings), not
+as numbers to hardcode into a production budget.
 
 | Model | Input per 1M tokens | Output per 1M tokens |
 |---|---|---|
 | gpt-4o | $5.00 | $15.00 |
 | **gpt-4o-mini** | **$0.15** | **$0.60** |
-| claude-3-5-sonnet | $3.00 | $15.00 |
-| **claude-3-5-haiku** | **$0.80** | **$4.00** |
-| gemini-1.5-pro | $3.50 | $10.50 |
-| **gemini-1.5-flash** | **$0.075** | **$0.30** |
+| claude-opus-5 | $5.00 | $25.00 |
+| claude-sonnet-5 | $2.00 | $10.00 |
+| **claude-haiku-4-5** | **$1.00** | **$5.00** |
+| gemini-2.5-pro | $1.25 | $10.00 |
+| **gemini-2.5-flash** | **$0.30** | **$2.50** |
 
 **Cost example:** If you send a 500-token prompt and receive a 200-token response with
 gpt-4o-mini:
@@ -635,8 +649,8 @@ Output cost: 200  / 1,000,000 × $0.60 = $0.000120
 Total cost:                              $0.000195  (~0.02 cents)
 ```
 
-For learning and prototyping, stick to gpt-4o-mini, claude-3-5-haiku, and
-gemini-1.5-flash. They are cheap enough that you can make thousands of calls without
+For learning and prototyping, stick to gpt-4o-mini, claude-haiku-4-5, and
+gemini-2.5-flash. They are cheap enough that you can make thousands of calls without
 worrying about cost.
 
 ---
@@ -644,7 +658,7 @@ worrying about cost.
 ### 5.4 Counting tokens with tiktoken
 
 `tiktoken` is OpenAI's tokenization library. It gives you exact token counts for GPT
-models without making an API call. For Claude and Gemini, it is approximate — the
+models without making an API call. For Claude and Gemini, it is approximate: the
 tokenizers are similar but not identical.
 
 ```python
@@ -665,13 +679,13 @@ def count_tokens(text: str, model: str = "gpt-4o-mini") -> int:
 
 # Examples
 count_tokens("The transformer architecture uses multi-head self-attention.")
-# → ~11 tokens
+# → 10 tokens
 
 count_tokens("Hello world")
 # → 2 tokens
 
 count_tokens("supercalifragilisticexpialidocious")
-# → ~5 tokens (complex words get split into multiple tokens)
+# → 10 tokens (rare/complex words get split into many small tokens)
 ```
 
 **Counting tokens in a messages array:**
@@ -705,9 +719,9 @@ def count_messages_tokens(messages: list, model: str = "gpt-4o-mini") -> int:
 PRICING = {
     "gpt-4o":                        {"input": 5.00,   "output": 15.00},
     "gpt-4o-mini":                   {"input": 0.15,   "output": 0.60},
-    "claude-3-5-sonnet-20241022":    {"input": 3.00,   "output": 15.00},
-    "claude-3-5-haiku-20241022":     {"input": 0.80,   "output": 4.00},
-    "gemini-1.5-flash":              {"input": 0.075,  "output": 0.30},
+    "claude-sonnet-5":               {"input": 2.00,   "output": 10.00},
+    "claude-haiku-4-5-20251001":     {"input": 1.00,   "output": 5.00},
+    "gemini-2.5-flash":              {"input": 0.30,   "output": 2.50},
 }
 
 def calculate_cost(input_tokens: int, output_tokens: int, model: str) -> dict:
@@ -785,8 +799,8 @@ context window. Here is a utility that checks this before each call:
 ```python
 CONTEXT_WINDOWS = {
     "gpt-4o-mini":               128_000,
-    "claude-3-5-haiku-20241022": 200_000,
-    "gemini-1.5-flash":        1_000_000,
+    "claude-haiku-4-5-20251001": 200_000,
+    "gemini-2.5-flash":        1_000_000,
 }
 
 def fits_in_context(messages: list, model: str, reserve_for_output: int = 1000) -> bool:
@@ -827,8 +841,8 @@ Unlike calling a local function, network-based API calls can fail for many reaso
 | Timeout | — | Request took too long | Depends — retry with caution |
 
 Understanding which errors are retryable versus which require code changes is essential.
-The 4xx errors (except 429) mean your request is fundamentally wrong — retrying will
-produce the same error. The 5xx errors and 429 are transient — waiting and retrying will
+The 4xx errors (except 429) mean your request is fundamentally wrong, and retrying will
+produce the same error. The 5xx errors and 429 are transient, so waiting and retrying will
 usually succeed.
 
 ---
@@ -856,7 +870,7 @@ the same time, they don't all retry at exactly the same intervals.
 
 ### 6.3 Manual exponential backoff
 
-Writing it manually is educational — it shows exactly what is happening:
+Writing it manually is educational: it shows exactly what is happening.
 
 ```python
 import time, random
@@ -999,7 +1013,7 @@ client_anthropic = Anthropic()
 def call_with_fallback(prompt: str) -> dict:
     """
     Try OpenAI first. If it fails (after retries), switch to Claude.
-    This achieves high availability — your app keeps working even if
+    This achieves high availability: your app keeps working even if
     one provider has an outage.
     """
     
@@ -1015,7 +1029,7 @@ def call_with_fallback(prompt: str) -> dict:
         {
             "name": "Claude Haiku",
             "call": lambda p: client_anthropic.messages.create(
-                model="claude-3-5-haiku-20241022",
+                model="claude-haiku-4-5-20251001",
                 max_tokens=300,
                 messages=[{"role": "user", "content": p}],
             ).content[0].text,
@@ -1073,8 +1087,8 @@ def demonstrate_error_types():
 
 ### 7.1 Why async matters for LLM applications
 
-API calls are **I/O-bound** operations. Your CPU does almost nothing during an API call
-— it sends the request, then waits for bytes to come back over the network. This is
+API calls are **I/O-bound** operations. Your CPU does almost nothing during an API call:
+it sends the request, then waits for bytes to come back over the network. This is
 fundamentally different from CPU-bound work like training a neural network.
 
 **Synchronous execution** (the default in Python):
@@ -1096,14 +1110,14 @@ Total: ~2 seconds (the longest single call)
 ```
 
 All three calls are waiting for network responses simultaneously. Your Python process is
-not doing three things at once in parallel (that would be multithreading) — it is
+not doing three things at once in parallel (that would be multithreading). It is
 interleaving them on a single thread using an event loop. When call 1 is waiting for the
 network, the event loop starts call 2. When call 2 is waiting, the event loop starts
 call 3. They are concurrent, not parallel, but for I/O-bound work this achieves the
 same speedup.
 
 **Analogy from ML:** Think of batched inference. Instead of running samples through your
-network one at a time, you batch them. Async API calls are the I/O equivalent — instead
+network one at a time, you batch them. Async API calls are the I/O equivalent: instead
 of waiting for one call to complete before starting the next, you run multiple calls
 concurrently. The speedup is proportional to the number of concurrent calls, bounded by
 rate limits.
@@ -1136,7 +1150,7 @@ other coroutines run in the meantime. When the result arrives, I will resume."
 
 ### 7.3 Async API clients
 
-The SDK providers offer async versions of their clients. You must use these — calling
+The SDK providers offer async versions of their clients. You must use these: calling
 the regular synchronous client inside an `async def` function blocks the entire event
 loop and defeats the purpose of async.
 
@@ -1217,7 +1231,7 @@ async def parallel_calls():
 ### 7.6 Rate-limited parallel calls with Semaphore
 
 Sending 100 requests simultaneously will hit your rate limit. A `Semaphore` acts as a
-concurrency throttle — at most N tasks can be "inside" the semaphore block at any time.
+concurrency throttle: at most N tasks can be "inside" the semaphore block at any time.
 When one task leaves (finishes), another can enter.
 
 ```python
@@ -1307,7 +1321,7 @@ After completing this phase, you understand:
    libraries that abstract away the HTTP layer.
 
 2. **The messages format is everything.** Every multi-turn conversation is just a list
-   of `{role, content}` dicts sent on every API call. The model is stateless — you
+   of `{role, content}` dicts sent on every API call. The model is stateless, so you
    maintain history.
 
 3. **Streaming is `stream=True`.** It dramatically improves perceived responsiveness by
@@ -1317,7 +1331,7 @@ After completing this phase, you understand:
    Calculate costs before they surprise you.
 
 5. **Only retry transient errors.** Use exponential backoff for 429 and 5xx. Never
-   retry 400 and 401 — those are bugs in your code.
+   retry 400 and 401; those are bugs in your code.
 
 6. **Async unlocks parallelism for I/O.** `asyncio.gather()` for concurrent calls,
    `Semaphore` to avoid rate limits. 5 parallel calls ≈ 5x speedup.
@@ -1368,6 +1382,6 @@ sequential execution.
 
 ---
 
-*Next: Phase 02 — Prompt Engineering*  
+*Next: Phase 02, Prompt Engineering*  
 *You will learn zero-shot, few-shot, Chain-of-Thought prompting, structured outputs,
 function calling, and how to build a data extraction pipeline.*

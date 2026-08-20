@@ -14,7 +14,6 @@ Demos:
 """
 
 import os
-import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -99,7 +98,7 @@ Final Answer: <answer>"""
 def demo_2_tool_inspection():
     section("DEMO 2 — Tool Definitions (what the LLM sees)")
 
-    from phase05_tools import ALL_TOOLS
+    from tools import ALL_TOOLS
 
     for t in ALL_TOOLS:
         print(f"\n  Tool: {t.name}")

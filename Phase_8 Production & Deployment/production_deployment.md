@@ -1,11 +1,11 @@
 # Phase 08 — Production & Deployment
 
-> **Prerequisites:** Phases 01–07 complete. You can build LLM apps, RAG systems,
+> **Prerequisites:** Phases 01-07 complete. You can build LLM apps, RAG systems,
 > agents, and fine-tune models.  
 > **What you'll learn:** FastAPI backends for LLM apps; rapid UIs with Streamlit/Gradio;
 > Docker containerization; automated evaluation with RAGAS/DeepEval; observability
 > with Langfuse and LangSmith.  
-> **Project:** A containerized, evaluated, observable AI service — wrapping the RAG
+> **Project:** A containerized, evaluated, observable AI service, wrapping the RAG
 > engine from Phase 04 in a production-grade deployment.
 
 ---
@@ -27,7 +27,7 @@
 
 ### 1.1 What "it works on my machine" is missing
 
-Every phase so far has produced working code — a RAG pipeline, an agent, a fine-tuned
+Every phase so far has produced working code: a RAG pipeline, an agent, a fine-tuned
 model. But "works when I run the Python script" and "works as a product other people
 rely on" are very different bars. The gap consists of:
 
@@ -106,7 +106,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
 # Interactive docs automatically available at http://localhost:8000/docs
 ```
 
-**Why `async def`:** Every LLM call is I/O-bound (Phase 01, Section 7) — your server
+**Why `async def`:** Every LLM call is I/O-bound (Phase 01, Section 7): your server
 process spends most of its time waiting for the LLM provider's response, not using CPU.
 With `async def` and `await`, FastAPI can handle other incoming requests while waiting
 for a slow LLM call to return, dramatically increasing the number of concurrent users
@@ -142,9 +142,21 @@ async def generate_tokens(message: str):
 async def chat_stream(request: ChatRequest):
     return StreamingResponse(
         generate_tokens(request.message),
-        media_type="text/event-stream",   # Server-Sent Events (SSE) content type
+        media_type="text/plain",   # see the note below before reaching for text/event-stream
     )
 ```
+
+**This is chunked plain-text streaming, not real SSE:** it's tempting to set
+`media_type="text/event-stream"` here since you're "streaming an LLM response," but genuine
+Server-Sent Events have a wire format: each event is a line starting with `data: `,
+multi-line payloads repeat the `data: ` prefix per line, and events end with a blank line
+(`\n\n`). The generator above just yields raw token fragments with none of that framing,
+so labeling it `text/event-stream` would be a lie a real `EventSource` client (or any
+spec-compliant SSE parser) would choke on. `text/plain` describes what's actually being
+sent. If you want real SSE (useful when a browser's native `EventSource` API is your
+client), wrap each yield as `f"data: {delta}\n\n"` and set the media type to match. But
+then you also need to handle payloads containing literal newlines, which SSE requires
+splitting across multiple `data:` lines.
 
 **Consuming a streaming endpoint from a client:**
 
@@ -196,7 +208,7 @@ async def chat(
 ```
 
 **Why a `Depends()` function instead of checking inside the endpoint:** Dependencies
-compose cleanly across many endpoints — write `verify_api_key` once, apply it to every
+compose cleanly across many endpoints: write `verify_api_key` once, apply it to every
 protected route. They also run before the request body is fully processed in some cases,
 rejecting unauthorized requests as early as possible, and they're independently testable.
 
@@ -234,7 +246,7 @@ async def chat(request: Request, chat_request: ChatRequest):
 ```
 
 For per-API-key (rather than per-IP) rate limiting, key the limiter on the API key
-extracted by your auth dependency instead of the client's IP address — more accurate
+extracted by your auth dependency instead of the client's IP address; more accurate
 for clients behind shared NATs or proxies.
 
 ---
@@ -272,7 +284,7 @@ async def chat(request: ChatRequest, api_key: str = Depends(verify_api_key)):
 ```
 
 **Why translate exceptions instead of letting them propagate:** An unhandled exception
-in FastAPI returns a generic 500 with (by default, in debug mode) a stack trace —
+in FastAPI returns a generic 500 with (by default, in debug mode) a stack trace,
 leaking internal implementation details to clients and giving them no actionable
 information. Mapping specific exceptions to specific status codes lets clients
 distinguish "retry me later" (503/504) from "you sent something wrong" (400/422) from
@@ -313,9 +325,9 @@ async def readiness_check():
 ```
 
 **Liveness vs readiness, the distinction that matters:** Liveness answers "should this
-container be restarted?" (if it fails, something is fundamentally broken — restart).
+container be restarted?" (if it fails, something is fundamentally broken; restart).
 Readiness answers "should traffic be routed here right now?" (if it fails, the process
-is fine but a dependency is temporarily down — don't restart, just stop sending traffic
+is fine but a dependency is temporarily down; don't restart, just stop sending traffic
 until it recovers). Conflating the two causes unnecessary restarts during transient
 upstream outages.
 
@@ -330,7 +342,7 @@ in far less time than a full frontend framework (React, Vue). They are the right
 for: internal tools, demos, prototypes you want stakeholders to click through, and
 data-science-adjacent products where the user base doesn't need a highly custom UI.
 They are the wrong choice for a polished consumer product with custom branding and
-complex interactions — for that, use the `frontend-design` patterns from a real
+complex interactions; for that, use the `frontend-design` patterns from a real
 frontend framework.
 
 ---
@@ -339,7 +351,7 @@ frontend framework.
 
 You already built a Streamlit RAG app in Phase 04. The production addition here is
 connecting Streamlit to your FastAPI backend over HTTP, rather than calling your AI
-logic directly inside the Streamlit process — this separates the UI from the backend
+logic directly inside the Streamlit process: this separates the UI from the backend
 the same way a real product separates frontend and backend services.
 
 ```python
@@ -383,7 +395,7 @@ if prompt := st.chat_input("Ask something..."):
 ```
 
 **Why call the backend over HTTP instead of importing your AI logic directly:** This
-mirrors real production architecture — the UI and the AI service can be deployed,
+mirrors real production architecture: the UI and the AI service can be deployed,
 scaled, and updated independently. If you later replace Streamlit with a React frontend,
 or add a mobile app, the FastAPI backend doesn't change at all.
 
@@ -463,7 +475,7 @@ demo = gr.ChatInterface(fn=chat_fn_streaming)
 "It works on my machine" fails in production because of differences in: Python version,
 installed system libraries, environment variables, file paths, and OS-level dependencies.
 A Docker container packages your application together with its exact runtime
-environment — the same container that runs on your laptop runs identically on a cloud
+environment: the same container that runs on your laptop runs identically on a cloud
 server, a teammate's machine, or a Kubernetes cluster.
 
 ---
@@ -500,7 +512,7 @@ and caches each layer if its inputs haven't changed. If you copy all your code f
 and `pip install` after, ANY code change invalidates the cache and forces a full
 dependency reinstall on every rebuild. By installing dependencies from `requirements.txt`
 first (which changes rarely) and copying code after (which changes often), you only
-re-run `pip install` when dependencies actually change — dramatically speeding up
+re-run `pip install` when dependencies actually change, dramatically speeding up
 iterative development.
 
 ---
@@ -530,7 +542,7 @@ docker stop ai-service && docker rm ai-service
 ```
 
 **Never bake secrets into the image.** Pass API keys via `-e` flags, `--env-file`, or
-your orchestrator's secrets management — never `COPY` a `.env` file into the image or
+your orchestrator's secrets management; never `COPY` a `.env` file into the image or
 hardcode keys in the Dockerfile. Anyone who can pull the image can extract anything
 baked into its layers.
 
@@ -538,13 +550,13 @@ baked into its layers.
 
 ### 4.4 docker-compose for multi-service apps
 
-A real product is rarely one container — you typically have the API backend, a frontend,
+A real product is rarely one container: you typically have the API backend, a frontend,
 maybe a vector database, maybe a Redis cache. `docker-compose` defines and runs all of
 them together.
 
 ```yaml
 # docker-compose.yml
-version: "3.9"
+# No top-level `version:` key — Compose V2 treats it as obsolete and warns if present.
 
 services:
   api:
@@ -559,7 +571,11 @@ services:
     volumes:
       - ./chroma_db:/app/chroma_db   # persist vector DB data outside the container
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      # NOT curl — python:3.11-slim (Section 4.2) is Debian slim and doesn't ship
+      # curl by default. Hitting the endpoint from Python avoids adding a package
+      # just for the healthcheck; this is what the project's own Dockerfile does.
+      test: ["CMD", "python", "-c",
+             "import httpx; httpx.get('http://localhost:8000/health', timeout=3).raise_for_status()"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -590,7 +606,7 @@ docker-compose down
 
 **The key insight of `depends_on: condition: service_healthy`:** Without this, Docker
 Compose starts containers in dependency order but does NOT wait for a service to be
-actually ready — just for its process to have started. The frontend container could
+actually ready, just for its process to have started. The frontend container could
 start and immediately fail trying to reach an API that's still loading its model or
 connecting to its vector database. The healthcheck-gated dependency ensures the frontend
 only starts once the API genuinely reports itself ready.
@@ -625,7 +641,7 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ### 5.1 Why automated evaluation matters in production
 
 Phase 04 (RAG) introduced manual evaluation: spot-checking a few questions, eyeballing
-answers. This does not scale, and crucially does not catch **regressions** — if you
+answers. This does not scale, and crucially does not catch **regressions**: if you
 change your chunk size, your retrieval strategy, or your prompt, how do you know if
 quality went up or down across your whole use case, not just the 3 examples you happened
 to try by hand? Automated evaluation frameworks solve this by running a fixed test set
@@ -726,14 +742,14 @@ Low answer_relevancy (even if faithfulness is high)
 ```
 
 This decomposition is RAGAS's main value over a single holistic "is this answer good"
-score — it tells you **which component of your pipeline** to fix.
+score: it tells you **which component of your pipeline** to fix.
 
 ---
 
 ### 5.4 DeepEval — broader LLM evaluation
 
-DeepEval covers a wider range of evaluation needs beyond RAG specifically — general
-answer correctness, safety/bias checks, conversational quality, and custom metrics — and
+DeepEval covers a wider range of evaluation needs beyond RAG specifically (general
+answer correctness, safety/bias checks, conversational quality, and custom metrics) and
 integrates with pytest, so evaluation can run as part of your CI pipeline.
 
 ```bash
@@ -775,7 +791,7 @@ pytest test_eval.py -v
 deepeval test run test_eval.py
 ```
 
-**RAGAS vs DeepEval — when to use which:**
+**RAGAS vs DeepEval: when to use which**
 
 | | RAGAS | DeepEval |
 |---|---|---|
@@ -863,7 +879,7 @@ if results["faithfulness"] < baseline_faithfulness - 0.05:
 
 ### 6.1 Why production observability differs from development tracing
 
-You used LangSmith in Phase 03 and Phase 05 for development-time debugging — seeing
+You used LangSmith in Phase 03 and Phase 05 for development-time debugging: seeing
 what a single chain or agent run did. Production observability has additional
 requirements: aggregating metrics across thousands of users and requests, tracking cost
 over time, alerting when error rates spike, and correlating traces with specific user
@@ -881,14 +897,12 @@ pip install langfuse
 ```
 
 ```python
-from langfuse import Langfuse
-from langfuse.decorators import observe
+from langfuse import get_client, observe
 
-langfuse = Langfuse(
-    public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
-    secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
-    host="https://cloud.langfuse.com",   # or self-hosted URL
-)
+# get_client() auto-configures from the LANGFUSE_PUBLIC_KEY / LANGFUSE_SECRET_KEY /
+# LANGFUSE_HOST env vars — see the note below on why this, not a manual
+# Langfuse(public_key=..., ...) call, is what you want here.
+langfuse = get_client()
 
 @observe()   # automatically traces this function's inputs, outputs, and timing
 async def answer_question(question: str, user_id: str) -> str:
@@ -899,10 +913,22 @@ async def answer_question(question: str, user_id: str) -> str:
 answer = await answer_question("What is RAG?", user_id="user-123")
 ```
 
+**A breaking change worth knowing about:** `langfuse.decorators` (`observe`,
+`langfuse_context`) was removed when the SDK rewrote its tracing on top of
+OpenTelemetry. `observe` now lives at the top level (`from langfuse import observe`),
+and per-call trace/span access goes through `get_client()` instead of a separate
+`langfuse_context` object. There's a sharper gotcha buried in this: constructing
+`Langfuse(public_key=..., secret_key=..., host=...)` yourself creates an instance that's
+*disconnected* from the OTel context `@observe` actually uses: calls like
+`update_current_span()` silently no-op and `get_current_trace_id()` returns `None`, with
+no error to tell you why. `get_client()` auto-configures from the same `LANGFUSE_*` env
+vars and is the instance `@observe`'s spans are attached to, so use it consistently
+instead of instantiating `Langfuse(...)` by hand.
+
 **Manual, fine-grained tracing for multi-step pipelines:**
 
 ```python
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, get_client
 
 @observe()
 async def rag_pipeline(question: str):
@@ -911,8 +937,10 @@ async def rag_pipeline(question: str):
     chunks = await retrieve_step(question)
     answer = await generate_step(question, chunks)
 
-    # Attach custom metadata/scores to the current trace
-    langfuse_context.update_current_observation(
+    # Attach custom metadata to the current span — must happen here, while this
+    # function's own @observe span is still open; get_client() called after this
+    # function returns would have no active span to attach to.
+    get_client().update_current_span(
         metadata={"num_chunks_retrieved": len(chunks)},
     )
     return answer
@@ -931,11 +959,11 @@ async def generate_step(question: str, chunks: list):
 ### 6.3 Tracking cost and usage per user
 
 A critical production need: knowing not just "what happened" but "what did it cost,
-and for whom" — essential for usage-based billing, abuse detection, and cost
+and for whom," essential for usage-based billing, abuse detection, and cost
 optimization.
 
 ```python
-from langfuse.decorators import observe, langfuse_context
+from langfuse import observe, get_client
 
 @observe(as_type="generation")
 async def call_llm_with_cost_tracking(prompt: str, user_id: str) -> str:
@@ -944,10 +972,11 @@ async def call_llm_with_cost_tracking(prompt: str, user_id: str) -> str:
         messages=[{"role": "user", "content": prompt}],
     )
 
-    # Explicitly log token usage and cost — Langfuse aggregates this
-    # across all calls, queryable by user, time range, or model
-    langfuse_context.update_current_observation(
-        usage={
+    # Explicitly log token usage — Langfuse aggregates this across all
+    # calls, queryable by user, time range, or model. Note the parameter
+    # is usage_details now, not usage.
+    get_client().update_current_generation(
+        usage_details={
             "input": response.usage.prompt_tokens,
             "output": response.usage.completion_tokens,
             "total": response.usage.total_tokens,
@@ -959,7 +988,7 @@ async def call_llm_with_cost_tracking(prompt: str, user_id: str) -> str:
 ```
 
 In the Langfuse dashboard, this enables queries like "total cost per user this month"
-or "which users are driving the most token usage" — essential for any product with
+or "which users are driving the most token usage," essential for any product with
 usage-based pricing or a need to detect anomalous/abusive usage patterns.
 
 ---
@@ -967,18 +996,18 @@ usage-based pricing or a need to detect anomalous/abusive usage patterns.
 ### 6.4 Scoring and feedback collection
 
 Production systems need to capture quality signals from real usage, not just
-pre-deployment test sets. Langfuse supports attaching scores to traces — from automated
+pre-deployment test sets. Langfuse supports attaching scores to traces, from automated
 evaluators (e.g., RAGAS run periodically on production traces) or from explicit user
 feedback (thumbs up/down).
 
 ```python
-from langfuse import Langfuse
+from langfuse import get_client
 
-langfuse = Langfuse()
+langfuse = get_client()
 
 # After a user gives feedback (e.g., clicking thumbs up/down in your UI)
 def record_user_feedback(trace_id: str, is_positive: bool, comment: str = None):
-    langfuse.score(
+    langfuse.create_score(   # .score() was renamed to .create_score()
         trace_id=trace_id,
         name="user_feedback",
         value=1 if is_positive else 0,
@@ -1000,7 +1029,7 @@ def score_production_sample(traces: list, metrics: list):
     for trace in traces:
         # Re-run RAGAS metrics against the actual production input/output
         score = compute_ragas_score(trace.input, trace.output, trace.context, metrics)
-        langfuse.score(trace_id=trace.id, name="ragas_faithfulness", value=score)
+        langfuse.create_score(trace_id=trace.id, name="ragas_faithfulness", value=score)
 ```
 
 ---
@@ -1041,7 +1070,7 @@ async def chat_with_monitoring(message: str, user_id: str) -> str:
 4. ✅ A feedback mechanism (explicit thumbs up/down, or implicit signals like retry rate)
 5. ✅ Automated quality scoring on a sample of production traffic, not just pre-deploy tests
 6. ✅ Alerting wired to a real notification channel (Slack, PagerDuty) for error rate
-   or cost spikes — not just a dashboard nobody checks
+   or cost spikes, not just a dashboard nobody checks
 
 ---
 
@@ -1053,7 +1082,7 @@ async def chat_with_monitoring(message: str, user_id: str) -> str:
    routes. Map provider exceptions to meaningful HTTP status codes.
 
 2. **Liveness ≠ readiness.** `/health` answers "is the process alive" (restart if not).
-   `/ready` answers "can dependencies be reached right now" (don't restart — wait).
+   `/ready` answers "can dependencies be reached right now" (don't restart; wait).
 
 3. **Streamlit/Gradio should call your backend over HTTP, not embed your AI logic
    directly.** This separation is what lets you swap frontends, scale them
@@ -1061,12 +1090,12 @@ async def chat_with_monitoring(message: str, user_id: str) -> str:
 
 4. **Docker layer caching rewards installing dependencies before copying code.**
    `COPY requirements.txt . && RUN pip install` before `COPY . .` means code changes
-   don't force dependency reinstalls. Never bake secrets into images — inject via
+   don't force dependency reinstalls. Never bake secrets into images; inject via
    environment variables at runtime.
 
 5. **RAGAS decomposes RAG quality into diagnosable components.** Low faithfulness
    with high context_precision points at generation (hallucination); low context_recall
-   points at retrieval. Don't just track one holistic score — track the four core
+   points at retrieval. Don't just track one holistic score; track the four core
    metrics separately so you know *what* to fix.
 
 6. **DeepEval brings evaluation into your test suite via pytest**, letting you gate
@@ -1075,7 +1104,7 @@ async def chat_with_monitoring(message: str, user_id: str) -> str:
    to catch regressions automatically.
 
 7. **Production observability needs cost-per-user tracking, feedback collection, and
-   automated alerting — not just request tracing.** A trace tells you what happened in
+   automated alerting, not just request tracing.** A trace tells you what happened in
    one request; aggregated metrics, scoring, and alerts tell you whether the system is
    healthy across all your users, over time, without you having to look.
 
@@ -1120,7 +1149,7 @@ You've now built, end to end:
 - **Phase 05:** An autonomous research agent
 - **Phase 06:** A multi-agent content production system
 - **Phase 07:** A fine-tuned domain-expert model
-- **Phase 08:** The production wrapper around all of it — API, containers, evaluation,
+- **Phase 08:** The production wrapper around all of it: API, containers, evaluation,
   and observability
 
 This is a complete AI engineering portfolio. The next step is yours: pick the project

@@ -1,0 +1,29 @@
+# Project 2: Research Copilot
+# Union of Phase 4 + Phase 5's dependencies (this project imports their code directly)
+# pip install -r requirements.txt
+
+langchain>=0.3.0
+langchain-openai>=0.2.0
+langchain-community>=0.3.0
+langchain-text-splitters>=0.3.0
+langchain-experimental>=0.3.0
+langchain-core>=0.3.0
+langgraph>=0.2.0
+langgraph-checkpoint-sqlite>=1.0.0
+
+chromadb>=0.5.0
+sentence-transformers>=3.0.0
+rank-bm25>=0.2.2
+
+openai>=1.40.0
+instructor>=1.3.0
+pydantic>=2.0.0
+
+pypdf>=4.0.0
+beautifulsoup4>=4.12.0
+tavily-python>=0.5.0
+httpx>=0.27.0
+numexpr>=2.10.0
+
+python-dotenv>=1.0.0
+numpy>=1.26.0

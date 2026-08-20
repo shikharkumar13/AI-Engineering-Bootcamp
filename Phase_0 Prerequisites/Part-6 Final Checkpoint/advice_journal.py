@@ -1,4 +1,4 @@
-# phase00_part6_advice_journal.py
+# advice_journal.py
 #
 # The Phase 00 Part 6 capstone project — a Daily Advice Journal.
 # See the full guide for a step-by-step explanation of every concept used
@@ -7,8 +7,8 @@
 # Setup:
 #   pip install requests
 # Run:
-#   python phase00_part6_advice_journal.py     (Windows)
-#   python3 phase00_part6_advice_journal.py    (Mac)
+#   python advice_journal.py     (Windows)
+#   python3 advice_journal.py    (Mac)
 
 import json
 import os

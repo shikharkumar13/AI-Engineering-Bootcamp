@@ -11,21 +11,26 @@ An autonomous agent built with LangGraph that:
 
 ## Project structure
 ```
-phase05_project/
-├── phase05_tools.py            ← All agent tools (search, fetch, calculator, notes)
-├── research_agent.py           ← ResearchAgent class (LangGraph StateGraph)
-├── phase05_demo.py             ← 7 demos
-└── phase05_requirements.txt
+Phase_5 AI Agents & LangGraph/
+├── tools.py               ← All agent tools (search, fetch, calculator, notes)
+├── research_agent.py      ← ResearchAgent class (LangGraph StateGraph)
+├── demo.py                ← 7 demos
+├── requirements.txt
+└── .env.example           ← copy to .env and fill in your keys
 ```
 
 ## Quick start
 
 ### 1. Install
 ```bash
-pip install -r phase05_requirements.txt
+pip install -r requirements.txt
 ```
 
 ### 2. Configure .env
+```bash
+cp .env.example .env
+```
+`.env.example` contains:
 ```bash
 OPENAI_API_KEY=sk-...
 TAVILY_API_KEY=tvly-...     # free tier at https://tavily.com
@@ -38,7 +43,7 @@ LANGCHAIN_PROJECT=phase05-research-agent
 
 ### 3. Run
 ```bash
-python phase05_demo.py
+python demo.py
 ```
 
 ## API reference

@@ -8,7 +8,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install dependencies first — separate layer, cached unless requirements file changes
-COPY phase08_requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Now copy application code — changes here don't invalidate the pip install cache

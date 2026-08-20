@@ -12,9 +12,7 @@ Demos:
   6. Full RAG pipeline with citations
 """
 
-import os
 import time
-import tempfile
 import numpy as np
 from pathlib import Path
 from dotenv import load_dotenv
@@ -115,7 +113,7 @@ def demo_1_embeddings():
 
     model = SentenceTransformer("BAAI/bge-small-en-v1.5")
     print(f"\n  Model: BAAI/bge-small-en-v1.5")
-    print(f"  Dimensions: {model.get_sentence_embedding_dimension()}")
+    print(f"  Dimensions: {model.get_embedding_dimension()}")
 
     sentences = [
         "The transformer uses self-attention to process sequences.",

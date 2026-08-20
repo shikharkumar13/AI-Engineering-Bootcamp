@@ -288,8 +288,8 @@ Your computer
 │   └── venv/  ← has openai v2.0 installed, only visible to Project B
 ```
 
-This is why every phase folder in this course (`phase01_project/`,
-`phase02_project/`, etc.) is meant to get its own virtual environment.
+This is why every phase folder in this course (`Phase_1 LLM APIs/`,
+`Phase_2 Prompt Engineering/`, etc.) is meant to get its own virtual environment.
 
 ### 5.3 Creating one
 

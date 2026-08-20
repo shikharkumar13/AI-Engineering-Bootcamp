@@ -3,30 +3,31 @@
 ## What this project does
 Fine-tunes Llama-3-8B with QLoRA (via Unsloth) to **always respond in a strict
 structured format** (`Issue / Resolution / Next Steps`) for customer support
-tickets — a behavioral pattern that's a textbook fine-tuning use case (not a
-RAG use case — see Phase 07 Section 1's decision framework).
+tickets: a behavioral pattern that's a textbook fine-tuning use case (not a
+RAG use case; see Phase 07 Section 1's decision framework).
 
 Pipeline: prepare dataset → fine-tune with QLoRA → evaluate vs base model
 (LLM-as-judge + catastrophic forgetting check) → serve via FastAPI.
 
 ## ⚠️ GPU requirement
 `train.py` and `evaluate.py` **require a CUDA GPU**. Unsloth and bitsandbytes
-cannot run on CPU. Use a **free Google Colab T4 GPU** — that's all this project
+cannot run on CPU. Use a **free Google Colab T4 GPU**: that's all this project
 needs thanks to QLoRA's memory efficiency.
 
 `inference_api.py` also needs a GPU to serve the model (run it on the same
-Colab instance, or any cloud GPU). `phase07_demo_client.py` does NOT need a GPU — it's
+Colab instance, or any cloud GPU). `demo_client.py` does NOT need a GPU: it's
 just an HTTP client that talks to the API.
 
 ## Project structure
 ```
-phase07_project/
+Phase_7 Fine-Tuning & Customization/
 ├── dataset_prep.py     ← Domain dataset (customer support, structured format)
 ├── train.py             ← QLoRA fine-tuning script (Unsloth) — GPU required
 ├── evaluate.py            ← Base vs fine-tuned comparison — GPU required
 ├── inference_api.py        ← FastAPI server for the fine-tuned model — GPU required
-├── phase07_demo_client.py            ← Test client for the API — NO GPU needed
-└── phase07_requirements.txt
+├── demo_client.py            ← Test client for the API — NO GPU needed
+├── requirements.txt
+└── .env.example         ← copy to .env locally, or set as Colab env vars (see step 4)
 ```
 
 ## Quick start (Google Colab)
@@ -73,7 +74,7 @@ plus a catastrophic-forgetting check on general capability questions.
 
 ### 8. Test the API (from anywhere — no GPU needed)
 ```bash
-python phase07_demo_client.py
+python demo_client.py
 ```
 
 ## API reference (once inference_api.py is running)
@@ -103,11 +104,11 @@ curl -X POST http://localhost:8000/chat \
 | `train.py` | 4-bit QLoRA loading, LoRA adapter config, SFTTrainer, gradient accumulation |
 | `evaluate.py` | Held-out evaluation, LLM-as-judge, catastrophic forgetting detection |
 | `inference_api.py` | Loading a fine-tuned model for serving, FastAPI lifespan model loading |
-| `phase07_demo_client.py` | Treating your fine-tuned model exactly like any other LLM API (Phase 01 callback) |
+| `demo_client.py` | Treating your fine-tuned model exactly like any other LLM API (Phase 01 callback) |
 
 ## Adapting this to your own domain
 
 Replace `SAMPLE_TICKETS` in `dataset_prep.py` with your own examples. The key
 design principle from Phase 07: fine-tuning works best for **behavior/format**
-patterns (tone, structure, task-specific skill), not for teaching new facts —
+patterns (tone, structure, task-specific skill), not for teaching new facts;
 use RAG (Phase 04) for facts that need to stay current.

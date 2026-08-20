@@ -21,14 +21,20 @@ LANGFUSE_ENABLED = bool(
 )
 
 if LANGFUSE_ENABLED:
-    from langfuse import Langfuse
-    from langfuse.decorators import observe, langfuse_context
+    # langfuse.decorators (observe, langfuse_context) was removed when the SDK moved
+    # to OpenTelemetry-based tracing — observe now lives at the top level, and the
+    # per-call trace/span is reached through a client from get_client(), not a
+    # separate langfuse_context object.
+    #
+    # get_client() (not a manual Langfuse(...) call) is deliberate: it auto-configures
+    # from the LANGFUSE_* env vars load_dotenv() already populated above, and it's the
+    # instance @observe's OTel spans actually attach to. Constructing Langfuse(...)
+    # directly creates a second, disconnected instance — update_current_span() and
+    # get_current_trace_id() silently no-op against it because @observe's spans were
+    # never opened on that instance.
+    from langfuse import observe, get_client
 
-    _langfuse_client = Langfuse(
-        public_key=os.getenv("LANGFUSE_PUBLIC_KEY"),
-        secret_key=os.getenv("LANGFUSE_SECRET_KEY"),
-        host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"),
-    )
+    _langfuse_client = get_client()
     logger.info("Langfuse observability ENABLED")
 else:
     _langfuse_client = None
@@ -46,13 +52,8 @@ else:
             return args[0]
         return decorator
 
-    class _NoOpContext:
-        def update_current_observation(self, *args, **kwargs):
-            pass
-        def update_current_trace(self, *args, **kwargs):
-            pass
-
-    langfuse_context = _NoOpContext()
+    def get_client():
+        return None
 
 
 # ── Traced service wrapper ─────────────────────────────────────────────────────
@@ -62,11 +63,19 @@ def traced_ask(rag_service, question: str, k: int, user_id: str = "anonymous"):
     """
     Wraps RAGService.ask() with full tracing: input, output, retrieved chunks,
     latency, and (if available) token usage / cost.
+
+    Returns (answer, trace_id). The trace ID must be read here, while this
+    function's @observe span is still the OpenTelemetry "current" span — once
+    this function returns, that span closes and the trace ID is no longer
+    reachable via get_current_trace_id() (it returns None outside an active
+    span), so callers can't fetch it after the fact the way the old SDK allowed.
     """
     answer = rag_service.ask(question, k=k)
+    trace_id = None
 
     if LANGFUSE_ENABLED:
-        langfuse_context.update_current_observation(
+        client = get_client()
+        client.update_current_span(
             input={"question": question, "k": k},
             output={"answer": answer.answer, "num_sources": answer.num_chunks},
             metadata={
@@ -75,8 +84,9 @@ def traced_ask(rag_service, question: str, k: int, user_id: str = "anonymous"):
                 "sources": [c.source for c in answer.sources],
             },
         )
+        trace_id = client.get_current_trace_id()
 
-    return answer
+    return answer, trace_id
 
 
 def record_feedback(trace_id: str, is_positive: bool, comment: str | None = None):
@@ -86,7 +96,7 @@ def record_feedback(trace_id: str, is_positive: bool, comment: str | None = None
                      f"{'positive' if is_positive else 'negative'} — {comment}")
         return
 
-    _langfuse_client.score(
+    _langfuse_client.create_score(
         trace_id=trace_id,
         name="user_feedback",
         value=1 if is_positive else 0,
@@ -100,14 +110,7 @@ def record_quality_score(trace_id: str, metric_name: str, value: float):
         logger.info(f"[no-op, Langfuse disabled] {metric_name}={value:.3f} for {trace_id}")
         return
 
-    _langfuse_client.score(trace_id=trace_id, name=metric_name, value=value)
-
-
-def get_current_trace_id() -> str | None:
-    """Get the current trace ID, for returning to the client (so they can submit feedback)."""
-    if not LANGFUSE_ENABLED:
-        return None
-    return langfuse_context.get_current_trace_id()
+    _langfuse_client.create_score(trace_id=trace_id, name=metric_name, value=value)
 
 
 def flush():

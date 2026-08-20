@@ -304,11 +304,49 @@ Next meeting: October 28 at 10am (launch readiness review)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# DEMO 6: Auto-detect and extract
+# DEMO 6: Receipt extraction
+# ─────────────────────────────────────────────────────────────────────────────
+
+def demo_receipt_extraction():
+    section("DEMO 6 — Receipt Extraction")
+
+    receipt = """
+Coffee House Roasters
+123 Main St, Portland, OR
+
+Date: 03/14/2025
+
+2x Latte (Large)          $5.50 each     $11.00
+1x Blueberry Muffin        $3.75          $3.75
+1x Cold Brew (Medium)      $4.25          $4.25
+
+Subtotal:                                $19.00
+Tax (8.5%):                               $1.62
+Total:                                   $20.62
+
+Payment: Visa ending in 4471
+Thank you for visiting!
+"""
+
+    result = extractor.extract_receipt(receipt)
+
+    print(f"\n  Merchant:  {result.merchant}")
+    print(f"  Date:      {result.date}")
+    print(f"  Items ({len(result.items)}):")
+    for item in result.items:
+        print(f"    • {item.name} — qty {item.quantity} @ ${item.unit_price} = ${item.total_price}")
+    print(f"  Subtotal:  ${result.subtotal}")
+    print(f"  Tax:       ${result.tax}")
+    print(f"  Total:     ${result.total}")
+    print(f"  Payment:   {result.payment_method}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DEMO 7: Auto-detect and extract
 # ─────────────────────────────────────────────────────────────────────────────
 
 def demo_auto_extract():
-    section("DEMO 6 — Auto Document Type Detection")
+    section("DEMO 7 — Auto Document Type Detection")
 
     texts = [
         "Hi, I need to update my billing address for account #88234. Can you help?",
@@ -329,11 +367,11 @@ def demo_auto_extract():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# DEMO 7: Raw function calling (under the hood)
+# DEMO 8: Raw function calling (under the hood)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def demo_raw_function_calling():
-    section("DEMO 7 — Raw Function Calling (what instructor does under the hood)")
+    section("DEMO 8 — Raw Function Calling (what instructor does under the hood)")
 
     email = """
 The Q3 report is ready for review. I've uploaded it to the shared drive.
@@ -354,11 +392,11 @@ Please review and send feedback by Wednesday.
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# DEMO 8: Batch extraction
+# DEMO 9: Batch extraction
 # ─────────────────────────────────────────────────────────────────────────────
 
 def demo_batch():
-    section("DEMO 8 — Batch Extraction")
+    section("DEMO 9 — Batch Extraction")
 
     emails = [
         "Hi, can you update my shipping address? Order #1234. — Tom",
@@ -388,6 +426,7 @@ if __name__ == "__main__":
     demo_job_posting()
     demo_news_article()
     demo_meeting_notes()
+    demo_receipt_extraction()
     demo_auto_extract()
     demo_raw_function_calling()
     demo_batch()

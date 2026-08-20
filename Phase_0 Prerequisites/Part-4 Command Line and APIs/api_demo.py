@@ -1,4 +1,4 @@
-# phase00_part4_api_demo.py
+# api_demo.py
 #
 # A hands-on demo of everything in Part 4: a GET request, reading a status
 # code, reading a JSON response, and sending an API key safely via .env.
@@ -7,12 +7,12 @@
 #   1. Activate your virtual environment (you should see (venv) in your prompt)
 #   2. Install the two packages this needs:
 #        pip install requests python-dotenv
-#   3. Make sure phase00_part4_.env.example has been copied to a real ".env"
+#   3. Make sure .env.example has been copied to a real ".env"
 #      file in this same folder (see the bottom of this file for exactly
 #      what it should contain)
 #   4. Run it:
-#        python phase00_part4_api_demo.py     (Windows)
-#        python3 phase00_part4_api_demo.py    (Mac)
+#        python api_demo.py     (Windows)
+#        python3 api_demo.py    (Mac)
 
 import os
 import requests

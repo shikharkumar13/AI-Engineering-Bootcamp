@@ -1,6 +1,6 @@
 # Phase 04 — RAG & Vector Databases
 
-> **Prerequisites:** Phases 01–03 complete. You can call LLM APIs, engineer prompts,
+> **Prerequisites:** Phases 01-03 complete. You can call LLM APIs, engineer prompts,
 > and build LangChain pipelines.  
 > **What you'll learn:** Embeddings, vector databases (FAISS, ChromaDB, Qdrant),
 > chunking strategies, four retrieval methods, and three advanced RAG techniques.  
@@ -30,10 +30,10 @@
 In Phase 03, `DocChat` worked by loading the entire document into the system prompt.
 This is called **context stuffing**. It works, but it has hard limits:
 
-- A 300-page PDF has roughly 150,000 tokens — exceeding most context windows
+- A 300-page PDF has roughly 150,000 tokens, exceeding most context windows
 - Even with a 1M-token window (Gemini), sending 150,000 tokens costs money on every
   single question, even if the answer is in a single paragraph
-- Research shows models struggle with "lost in the middle" — relevant information
+- Research shows models struggle with "lost in the middle": relevant information
   buried in a long context is often ignored ("Lost in the Middle", Liu et al., 2023)
 - You cannot dynamically update context-stuffed knowledge without rebuilding the prompt
 
@@ -61,7 +61,7 @@ most relevant to the user's question. This is fast, cheap, and more accurate.
 
 **The key insight:** Questions and their answers are semantically similar. If the user
 asks "What is the boiling point of water?", the chunk containing "Water boils at 100°C
-at sea level" will be nearby in embedding space — even though the phrasing is different.
+at sea level" will be nearby in embedding space, even though the phrasing is different.
 
 ---
 
@@ -101,7 +101,7 @@ An embedding is a fixed-size vector of floating-point numbers that represents th
 close together in the high-dimensional space.
 
 **From your ML background:** You already know embeddings. In a classification neural
-network, the layer before the softmax output is the embedding (representation) layer —
+network, the layer before the softmax output is the embedding (representation) layer:
 it projects the input into a learned feature space. For text embedding models, the entire
 network is trained to produce vectors where semantic similarity maps to geometric
 proximity. The most common training objective is contrastive learning: push embeddings
@@ -133,11 +133,11 @@ cos(θ) = (A · B) / (|A| × |B|)    range: -1 to 1
 - `0.0` = perpendicular (unrelated)
 - `-1.0` = opposite direction (antonyms)
 
-**Dot product:** No normalization — larger vectors get higher scores.
+**Dot product:** No normalization; larger vectors get higher scores.
 
 Cosine similarity is preferred for text because the magnitude of an embedding does not
 carry semantic information. A long text and a short text about the same topic should be
-considered similar — cosine handles this correctly by ignoring magnitude.
+considered similar, and cosine handles this correctly by ignoring magnitude.
 
 ```python
 import numpy as np
@@ -178,7 +178,7 @@ def embed_openai(texts: list[str], model: str = "text-embedding-3-small") -> lis
     return [item.embedding for item in response.data]
 
 
-# Available models (as of late 2024)
+# Available models (pricing changes over time — verify at platform.openai.com/pricing)
 # text-embedding-3-small: 1536 dimensions, $0.02/1M tokens — best cost/quality for RAG
 # text-embedding-3-large: 3072 dimensions, $0.13/1M tokens — highest quality
 # text-embedding-ada-002: 1536 dimensions, $0.10/1M tokens — legacy, use 3-small instead
@@ -318,7 +318,7 @@ for doc, score in sorted(zip(candidates, scores), key=lambda x: -x[1]):
 **When to use which:**
 - Prototyping: `bge-small` (free, fast, good enough)
 - Development: `text-embedding-3-small` (consistent quality, easy)
-- Production: benchmark on your data — often `bge-large` matches `text-embedding-3-large`
+- Production: benchmark on your data; often `bge-large` matches `text-embedding-3-large`
 
 ---
 
@@ -327,7 +327,7 @@ for doc, score in sorted(zip(candidates, scores), key=lambda x: -x[1]):
 ### 3.1 Why a specialized database?
 
 A regular SQL database can store vectors, but finding the nearest neighbor requires
-comparing a query vector against every stored vector — O(n) complexity. With 1 million
+comparing a query vector against every stored vector: O(n) complexity. With 1 million
 chunks, that means 1 million cosine similarity calculations per query.
 
 Vector databases use **Approximate Nearest Neighbor (ANN)** algorithms to find the
@@ -340,7 +340,7 @@ a graph-based index where nodes are vectors and edges connect similar ones.
 ### 3.2 FAISS — in-memory, from Meta/Facebook
 
 FAISS (Facebook AI Similarity Search) is a C++ library with Python bindings. It is not
-a database — it has no persistence built-in — but it is the fastest option for
+a database (it has no persistence built-in), but it is the fastest option for
 pure vector search.
 
 ```python
@@ -533,12 +533,12 @@ points = [
 
 client.upsert(collection_name="my_docs", points=points)
 
-# Search
+# Search — client.search() was removed; query_points() is the current API
 query_vec = embed_model.encode(["machine learning"]).tolist()[0]
 
-results = client.search(
+response = client.query_points(
     collection_name="my_docs",
-    query_vector=query_vec,
+    query=query_vec,
     limit=2,
     with_payload=True,
     query_filter=Filter(           # optional: filter by metadata
@@ -551,12 +551,12 @@ results = client.search(
     )
 )
 
-for r in results:
+for r in response.points:
     print(f"  [{r.score:.3f}] {r.payload['text']} (page {r.payload['page']})")
 
 # Collection info
 info = client.get_collection("my_docs")
-print(f"Vectors: {info.vectors_count}")
+print(f"Points: {info.points_count}")
 ```
 
 ---
@@ -590,7 +590,7 @@ If a chunk is too small:
 - Retrieved chunks lack context → LLM cannot answer fully
 - A sentence alone often lacks the surrounding context that makes it meaningful
 
-The goal is chunks that are **topically coherent** — each chunk is about one thing.
+The goal is chunks that are **topically coherent**: each chunk is about one thing.
 
 ---
 
@@ -634,7 +634,7 @@ splitter = RecursiveCharacterTextSplitter(
 ### 4.4 Semantic splitting — split on meaning, not size
 
 Semantic splitting embeds each sentence, then splits where the embedding similarity
-drops — i.e., where the topic changes. This produces chunks that are guaranteed to be
+drops, that is, where the topic changes. This produces chunks that are guaranteed to be
 about one topic, regardless of how long they are.
 
 ```python
@@ -694,6 +694,10 @@ parent_map = {i: p.page_content for i, p in enumerate(parents)}
 ### 5.1 Similarity search (dense retrieval)
 
 The baseline: embed the query, find the top-k most similar vectors in the database.
+
+> **Note:** `langchain-community` (used below for `SentenceTransformerEmbeddings`) is
+> being sunset upstream in favor of standalone integration packages, same as noted in
+> Phase 03. The import still works today and emits a `DeprecationWarning`.
 
 ```python
 from langchain_chroma import Chroma
@@ -797,10 +801,10 @@ for idx in top_indices:
 ```
 
 **When BM25 beats vector search:**
-- Exact product codes: "SKU-XR-4521" — vector search may not find exact matches
-- Person names: "Geoff Hinton" — might not be in the embedding model's vocabulary cleanly
+- Exact product codes: "SKU-XR-4521" (vector search may not find exact matches)
+- Person names: "Geoff Hinton" (might not be in the embedding model's vocabulary cleanly)
 - Technical abbreviations: "GPT-4o", "RLHF", "LoRA"
-- Legal references: "Section 42(b)(ii)" — exact text matching matters
+- Legal references: "Section 42(b)(ii)" (exact text matching matters)
 
 **When vector search beats BM25:**
 - Paraphrased questions: "error during training" matches "loss not converging"
@@ -884,7 +888,7 @@ def hybrid_retrieve(
 
 After getting top-20 candidates with hybrid retrieval, re-rank them with a cross-encoder.
 The cross-encoder reads each (query, chunk) pair together and produces a precise
-relevance score — far more accurate than embedding similarity.
+relevance score, far more accurate than embedding similarity.
 
 ```python
 from sentence_transformers import CrossEncoder
@@ -1212,7 +1216,7 @@ def rag_with_citations(
    encoders are accurate (joint query-doc encoding). Use both in a two-stage pipeline.
 
 3. **ChromaDB for development, Qdrant for production.** ChromaDB is the simplest
-   persistent vector database — zero setup, great Python API. Qdrant adds filtering,
+   persistent vector database: zero setup, great Python API. Qdrant adds filtering,
    quantization, and scale.
 
 4. **Hybrid retrieval (BM25 + vector) beats either alone.** Vector search misses exact
@@ -1221,7 +1225,7 @@ def rag_with_citations(
 
 5. **Re-ranking is the highest-ROI improvement.** Get top-20 with bi-encoder + BM25,
    re-rank with cross-encoder, return top-5 to the LLM. Dramatically improves answer
-   quality with only 0.5–2 seconds of extra latency.
+   quality with only 0.5-2 seconds of extra latency.
 
 6. **HyDE for hard queries, parent-child for long documents.** HyDE bridges the
    question-answer phrasing gap. Parent-child balances retrieval precision (small
@@ -1260,6 +1264,6 @@ scores and identify the weakest component.
 
 ---
 
-*Next: Phase 05 — AI Agents & LangGraph*  
+*Next: Phase 05, AI Agents & LangGraph*  
 *You will build autonomous systems that plan, decide which tools to use, and loop
-until a task is complete — not just answer one question.*
+until a task is complete, not just answer one question.*

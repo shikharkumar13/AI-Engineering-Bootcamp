@@ -19,10 +19,9 @@ Swap SAMPLE_TICKETS below with your own domain data to adapt this project to
 any niche use case.
 """
 
-import json
 import random
 from pathlib import Path
-from datasets import Dataset, load_dataset
+from datasets import Dataset
 
 
 # ── Sample domain dataset ──────────────────────────────────────────────────────
@@ -161,17 +160,36 @@ def build_dataset(target_size: int = 40, eval_fraction: float = 0.15, seed: int 
     """
     Build the train/eval split for fine-tuning.
 
+    Splits the *base* tickets first, then expands each side independently into
+    paraphrased variants. Expanding first and splitting afterward (the naive
+    order) lets near-duplicate paraphrases of the same base ticket land in both
+    train and eval — since expand_dataset_with_variations only varies the
+    instruction's greeting prefix and keeps the response text identical, that
+    would mean the eval set isn't actually held out: the model could have seen
+    the exact same response, word for word, during training.
+
     Returns:
         dict with 'train' and 'eval' Dataset objects
     """
     random.seed(seed)
-    examples = expand_dataset_with_variations(SAMPLE_TICKETS, target_size=target_size)
-    random.shuffle(examples)
+    base_examples = list(SAMPLE_TICKETS)
+    random.shuffle(base_examples)
 
-    dataset = Dataset.from_list(examples)
-    split = dataset.train_test_split(test_size=eval_fraction, seed=seed)
+    n_eval_base = max(1, round(len(base_examples) * eval_fraction))
+    eval_base, train_base = base_examples[:n_eval_base], base_examples[n_eval_base:]
 
-    return {"train": split["train"], "eval": split["test"]}
+    eval_size = max(1, round(target_size * eval_fraction))
+    train_size = target_size - eval_size
+
+    train_examples = expand_dataset_with_variations(train_base, target_size=train_size)
+    eval_examples  = expand_dataset_with_variations(eval_base, target_size=eval_size)
+    random.shuffle(train_examples)
+    random.shuffle(eval_examples)
+
+    return {
+        "train": Dataset.from_list(train_examples),
+        "eval":  Dataset.from_list(eval_examples),
+    }
 
 
 def format_for_chat_template(example: dict, tokenizer) -> dict:

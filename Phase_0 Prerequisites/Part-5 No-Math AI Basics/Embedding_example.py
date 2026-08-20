@@ -1,4 +1,4 @@
-# phase00_part5_embedding_toy.py
+# Embedding_example.py
 #
 # A toy demonstration of "similar meaning = nearby points" — using
 # hand-picked 2D coordinates instead of a real trained model, so you can
@@ -6,8 +6,8 @@
 # dependencies. See Phase 00 Part 5, Section 8-9 for the full explanation.
 #
 # Run it:
-#   python phase00_part5_embedding_toy.py     (Windows)
-#   python3 phase00_part5_embedding_toy.py    (Mac)
+#   python Embedding_example.py     (Windows)
+#   python3 Embedding_example.py    (Mac)
 
 # Each word gets a made-up (size, wildness) coordinate, in the same spirit
 # as the diagram in the guide's Section 8.2. A REAL embedding model learns

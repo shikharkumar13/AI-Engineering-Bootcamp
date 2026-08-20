@@ -4,7 +4,7 @@
 Takes the RAG concept from Phase 04 and wraps it in everything a real product
 needs: a FastAPI backend with auth/rate-limiting/streaming, Docker
 containerization, automated RAGAS evaluation, Langfuse observability, and a
-Streamlit frontend that talks to the backend over HTTP — not direct function
+Streamlit frontend that talks to the backend over HTTP, not direct function
 calls.
 
 ```
@@ -23,17 +23,17 @@ All wired together with Docker + docker-compose
 
 ## Project structure
 ```
-phase08_project/
+Phase_8 Production & Deployment/
 ├── rag_service.py        ← Core AI logic (lightweight RAG engine)
 ├── main.py                 ← FastAPI backend (auth, rate limit, streaming, health)
 ├── observability.py          ← Langfuse tracing wrapper (graceful no-op if unconfigured)
 ├── evaluation.py               ← RAGAS regression-test suite
 ├── streamlit_app.py              ← Frontend (calls main.py over HTTP)
-├── phase08_demo_client.py           ← Exercises every API endpoint
+├── demo_client.py           ← Exercises every API endpoint
 ├── Dockerfile                        ← Backend container
 ├── Dockerfile.streamlit                ← Frontend container
 ├── docker-compose.yml                    ← Orchestrates both, with healthchecks
-├── phase08_requirements.txt
+├── requirements.txt
 └── .env.example
 ```
 
@@ -42,7 +42,7 @@ phase08_project/
 ### Option A — Run locally (no Docker)
 
 ```bash
-pip install -r phase08_requirements.txt
+pip install -r requirements.txt
 cp .env.example .env   # fill in OPENAI_API_KEY at minimum
 
 # Terminal 1: backend
@@ -52,7 +52,7 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 streamlit run streamlit_app.py
 
 # Terminal 3: exercise every endpoint
-python phase08_demo_client.py
+python demo_client.py
 ```
 
 ### Option B — Run with Docker Compose (recommended — this is the actual point of this phase)
@@ -71,7 +71,7 @@ docker-compose up --build
 python evaluation.py
 ```
 First run establishes a baseline. Subsequent runs flag regressions if any
-metric drops more than 0.05 below baseline — this is what you'd wire into CI.
+metric drops more than 0.05 below baseline: this is what you'd wire into CI.
 
 ## API reference
 
@@ -112,7 +112,7 @@ curl -X POST http://localhost:8000/feedback \
 | `Dockerfile` / `Dockerfile.streamlit` | Layer caching order, non-root user, `HEALTHCHECK` |
 | `docker-compose.yml` | Multi-service orchestration, `depends_on: condition: service_healthy`, named volumes for persistence |
 | `streamlit_app.py` | Frontend calling backend over HTTP (architectural separation), streaming consumption, feedback UI |
-| `phase08_demo_client.py` | Exercises auth failures, rate limiting, streaming, and feedback end-to-end |
+| `demo_client.py` | Exercises auth failures, rate limiting, streaming, and feedback end-to-end |
 
 ## What makes this "production" rather than another prototype
 
@@ -121,17 +121,17 @@ curl -X POST http://localhost:8000/feedback \
 2. **It rejects bad requests properly.** Missing auth gets 401. No docs indexed
    gets 400. Upstream LLM overloaded gets 503. Not a stack trace leaked to the client.
 3. **It's reproducible.** `docker-compose up` produces the same environment
-   anywhere — no "works on my machine."
+   anywhere, no "works on my machine."
 4. **It's measurable.** `evaluation.py` gives you a quantitative, regression-
    detecting answer to "did my change make this better or worse?" instead of
    "I tried 3 questions and it seemed fine."
 5. **It's observable.** Every request is traced with cost, latency, and
-   retrieved sources — and real users can flag bad answers via `/feedback`.
+   retrieved sources, and real users can flag bad answers via `/feedback`.
 
 ## Adapting this to your own capstone
 
 Swap `rag_service.py` for the agent from Phase 05, the multi-agent crew from
-Phase 06, or the fine-tuned model API from Phase 07 — `main.py`,
+Phase 06, or the fine-tuned model API from Phase 07: `main.py`,
 `observability.py`, the Docker setup, and the evaluation pattern (swap RAGAS
 for DeepEval custom metrics if not RAG-specific) all transfer directly. This
 is the production shell for any AI service you build going forward.

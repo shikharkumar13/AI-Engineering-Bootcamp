@@ -8,7 +8,7 @@
 #   !pip install unsloth
 #   !pip install --no-deps trl peft accelerate bitsandbytes
 #
-# pip install -r phase07_requirements.txt   (on a CUDA machine)
+# pip install -r requirements.txt   (on a CUDA machine)
 
 unsloth>=2024.9
 torch>=2.1.0

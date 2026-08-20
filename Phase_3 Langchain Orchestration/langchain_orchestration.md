@@ -53,26 +53,26 @@ PDFs have structure, HTML has tags, CSVs have headers, Word docs need parsing.
 Writing loaders for each format is boring and error-prone.
 
 **Problem 4: No observability.**  
-You cannot see inside what is happening — which prompt was sent, what came back, how
+You cannot see inside what is happening: which prompt was sent, what came back, how
 many tokens were used across a multi-step pipeline.
 
 LangChain solves all four of these. It is a framework of composable, interchangeable
 building blocks for LLM applications:
 
-- **Prompt templates** — reusable prompt objects with variable substitution
-- **Model wrappers** — consistent interface across all providers
-- **Output parsers** — extract structured data from model responses
-- **LCEL** — compose all of the above with the `|` operator
-- **Memory** — manage conversation history automatically
-- **Document loaders** — load any file type into a standard format
-- **Text splitters** — split large documents into chunks
-- **LangSmith** — trace, debug, and evaluate everything
+- **Prompt templates:** reusable prompt objects with variable substitution
+- **Model wrappers:** consistent interface across all providers
+- **Output parsers:** extract structured data from model responses
+- **LCEL:** compose all of the above with the `|` operator
+- **Memory:** manage conversation history automatically
+- **Document loaders:** load any file type into a standard format
+- **Text splitters:** split large documents into chunks
+- **LangSmith:** trace, debug, and evaluate everything
 
 ---
 
 ### 1.1 When NOT to use LangChain
 
-LangChain adds abstraction. Abstraction has a cost — more to learn, more indirection, 
+LangChain adds abstraction. Abstraction has a cost: more to learn, more indirection, 
 more things that can break in non-obvious ways. Do not reach for it automatically.
 
 | Use LangChain | Stick to raw API calls |
@@ -127,7 +127,7 @@ LANGCHAIN_PROJECT=phase03-doc-chat  # optional — groups your traces
 
 Get your LangSmith API key at: https://smith.langchain.com (free tier available).  
 Setting `LANGCHAIN_TRACING_V2=true` is all you need. Every LangChain call is then
-automatically traced — no code changes required.
+automatically traced, no code changes required.
 
 ---
 
@@ -135,7 +135,7 @@ automatically traced — no code changes required.
 
 ### 3.1 The ChatModel
 
-`ChatOpenAI` is LangChain's wrapper around the OpenAI chat API. It is a `Runnable` —
+`ChatOpenAI` is LangChain's wrapper around the OpenAI chat API. It is a `Runnable`,
 meaning it can be composed with other Runnables using `|`.
 
 ```python
@@ -203,8 +203,8 @@ messages = template.invoke({
 ```
 
 **Template variable syntax:**
-- `{variable_name}` — required variable, must be provided
-- There is no optional variable syntax — use Python logic before invoking if needed
+- `{variable_name}`: required variable, must be provided
+- There is no optional variable syntax; use Python logic before invoking if needed
 
 **The `MessagesPlaceholder`:**  
 This is how you inject a list of messages (like conversation history) into a template.
@@ -233,7 +233,7 @@ messages = template.invoke({
 #    AIMessage("A transformer is..."), HumanMessage("How does attention work...")]
 ```
 
-This is the core mechanism behind conversation memory — MessagesPlaceholder injects
+This is the core mechanism behind conversation memory: MessagesPlaceholder injects
 the history into the prompt before each model call.
 
 ---
@@ -283,7 +283,7 @@ print(type(result))  # → dict  (not string!)
 
 > **When to use `JsonOutputParser` vs `instructor`?**  
 > `instructor` (from Phase 02) is more reliable because it uses function calling.
-> `JsonOutputParser` just asks the model to format as JSON and parses it — it can fail
+> `JsonOutputParser` just asks the model to format as JSON and parses it, so it can fail
 > if the model adds commentary. Use `instructor` for critical extraction; use
 > `JsonOutputParser` when you want LangChain integration and the structure is simple.
 
@@ -293,7 +293,8 @@ print(type(result))  # → dict  (not string!)
 
 LCEL is the modern way to build LangChain pipelines. It was introduced in v0.1 and is
 now the primary interface. The old `LLMChain`, `ConversationChain`, `SequentialChain`
-classes still exist but are deprecated — LCEL replaces them all.
+classes were deprecated for years and have since been removed from current LangChain
+releases entirely. LCEL replaces them all.
 
 ### 4.1 The `|` operator — composing Runnables
 
@@ -470,8 +471,11 @@ print(result)  # → "Neural networks learn patterns from data..."
 
 ### 4.6 Why LCEL over the old chain classes
 
-The old LangChain had `LLMChain`, `SequentialChain`, `ConversationChain`, etc. These
-are still importable but deprecated. Here is why LCEL replaced them:
+The old LangChain had `LLMChain`, `SequentialChain`, `ConversationChain`, etc. These were
+deprecated for years and have since been removed from `langchain.chains` entirely in
+current LangChain releases (`from langchain.chains import LLMChain` now raises
+`ModuleNotFoundError`), so there is no fallback to the old way even if you wanted one.
+Here is why LCEL replaced them:
 
 | Feature | Old LLMChain | LCEL |
 |---|---|---|
@@ -483,8 +487,8 @@ are still importable but deprecated. Here is why LCEL replaced them:
 | Debugging | Black box | LangSmith traces every step |
 
 ```python
-# OLD WAY — deprecated, do not use in new code
-from langchain.chains import LLMChain  # legacy
+# OLD WAY — removed from current LangChain; shown only for contrast
+from langchain.chains import LLMChain  # ModuleNotFoundError today
 chain = LLMChain(llm=llm, prompt=prompt)
 result = chain.run(text="explain backprop")  # returns string, no streaming
 
@@ -568,6 +572,12 @@ history_bob   = get_session_history("bob-456")
 
 ### 5.3 RunnableWithMessageHistory — memory-aware chains
 
+> **Note:** LangChain has since marked `RunnableWithMessageHistory` deprecated in favor
+> of LangGraph's built-in persistence (constructing one now prints a
+> `LangChainDeprecationWarning`). It still works, and this phase teaches it deliberately:
+> LangGraph itself is the subject of Phase 05, not this one. Once you reach Phase 05,
+> revisit this section and compare the two approaches.
+
 `RunnableWithMessageHistory` wraps any LCEL chain and automatically:
 1. Loads the conversation history before each call
 2. Injects it into the `MessagesPlaceholder` in your prompt
@@ -630,7 +640,7 @@ print("Bob's first message:", reply)
 ### 5.4 Memory strategies
 
 **Buffer memory (keep everything):**  
-The default — every message is kept. Simple but the context window fills up over time.
+The default: every message is kept. Simple, but the context window fills up over time.
 
 ```python
 # What is in the history after N turns:
@@ -736,7 +746,7 @@ print(doc.page_content)  # the text
 print(doc.metadata)      # source info, page numbers, etc.
 ```
 
-Loaders return `list[Document]` — one Document per page (for PDFs), one per row (for
+Loaders return `list[Document]`: one Document per page (for PDFs), one per row (for
 CSV), or one for the whole file (for text).
 
 ---
@@ -921,8 +931,8 @@ for i, chunk in enumerate(chunks):
 
 **Splitting Documents (not raw text):**
 
-When you load documents and then split, use `split_documents()` — it preserves the
-metadata (source file, page number) in each chunk:
+When you load documents and then split, use `split_documents()`: it preserves the
+metadata (source file, page number) in each chunk.
 
 ```python
 # Load then split — metadata is preserved
@@ -968,7 +978,7 @@ stranded without context.
 | Code files | 500–1500 chars (split by function) |
 
 **Choosing chunk_overlap:**  
-A common rule: 10–20% of `chunk_size`. For `chunk_size=1000`, use `chunk_overlap=150`
+A common rule: 10-20% of `chunk_size`. For `chunk_size=1000`, use `chunk_overlap=150`
 to `chunk_overlap=200`.
 
 ---
@@ -1014,7 +1024,7 @@ LangChain pipeline, you need to see:
 - How long each step took
 - Where exactly a pipeline failed when something goes wrong
 
-LangSmith is Anthropic-made observability for LangChain. It captures all of this
+LangSmith is LangChain's own observability platform. It captures all of this
 automatically, with zero code changes, just by setting environment variables.
 
 ---
@@ -1028,8 +1038,8 @@ LANGCHAIN_API_KEY=ls__your_key_here
 LANGCHAIN_PROJECT=my-project-name   # optional — groups traces together
 ```
 
-That is all. Every `chain.invoke()`, `chain.stream()`, every model call, every retriever
-call — all traced automatically. Go to https://smith.langchain.com to see them.
+That is all. Every `chain.invoke()`, `chain.stream()`, every model call, and every
+retriever call is traced automatically. Go to https://smith.langchain.com to see them.
 
 ```python
 from dotenv import load_dotenv
@@ -1138,11 +1148,11 @@ After completing this phase, you understand:
 
 4. **Memory is a wrapper, not a chain feature.** `RunnableWithMessageHistory` wraps
    any LCEL chain. The chain itself is stateless; the wrapper adds state. Session
-   management is your responsibility — use a dict keyed by session_id.
+   management is your responsibility: use a dict keyed by session_id.
 
 5. **Documents are `page_content` + `metadata`.** Every loader produces this object.
    Every splitter consumes and produces it. Metadata (source, page) is preserved
-   through the splitting process — this is crucial for citations in Phase 04.
+   through the splitting process, which is crucial for citations in Phase 04.
 
 6. **`RecursiveCharacterTextSplitter` is the default.** Start with `chunk_size=1000`,
    `chunk_overlap=200`. Adjust based on your model's context window and task.
@@ -1187,6 +1197,6 @@ Log a warning whenever the summarization triggers.
 
 ---
 
-*Next: Phase 04 — RAG & Vector Databases*  
+*Next: Phase 04, RAG & Vector Databases*  
 *You will give LLMs access to large document collections that would never fit in a
 context window, using vector embeddings and semantic search.*

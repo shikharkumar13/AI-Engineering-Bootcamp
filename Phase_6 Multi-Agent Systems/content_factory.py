@@ -42,12 +42,13 @@ class PipelineResult:
         print(f"  CONTENT FACTORY RESULT: {self.topic}")
         print(f"{'═'*64}")
 
-        print(f"\n📋 Research ({self.timings.get('research', 0):.1f}s):")
+        print(f"\n📋 Research:")
         if self.research_findings:
             for fact in self.research_findings.facts[:5]:
                 print(f"  • {fact}")
 
-        print(f"\n✍️  Edited Article ({self.timings.get('write_edit', 0):.1f}s, "
+        print(f"\n✍️  Edited Article "
+              f"({self.timings.get('research_write_edit', 0):.1f}s research+write+edit, "
               f"{len(self.edited_article)} chars):")
         print(f"  {self.edited_article[:300]}...")
 

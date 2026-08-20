@@ -33,10 +33,9 @@ def section(title: str):
 def demo_1_minimal_crew():
     section("DEMO 1 — Minimal CrewAI Example (1 agent, 1 task)")
 
-    from crewai import Agent, Task, Crew, Process
-    from langchain_openai import ChatOpenAI
+    from crewai import Agent, Task, Crew, Process, LLM
 
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
+    llm = LLM(model="gpt-4o-mini", temperature=0.3)
 
     summarizer = Agent(
         role="Technical Summarizer",
@@ -187,10 +186,9 @@ def demo_5_structured_output():
 def demo_6_specialization_effect():
     section("DEMO 6 — Effect of Agent Specialization (role/goal/backstory)")
 
-    from crewai import Agent, Task, Crew, Process
-    from langchain_openai import ChatOpenAI
+    from crewai import Agent, Task, Crew, Process, LLM
 
-    llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.3)
+    llm = LLM(model="gpt-4o-mini", temperature=0.3)
 
     generic_agent = Agent(
         role="Assistant",

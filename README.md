@@ -19,6 +19,7 @@ this repo is pseudocode — every script here has actually been run.
 - [Repository Structure](#repository-structure)
 - [How to Use This Repo](#how-to-use-this-repo)
 - [Capstone Projects at a Glance](#capstone-projects-at-a-glance)
+- [Practice Projects](#practice-projects)
 - [Bonus: AI System Design for Interviews](#bonus-ai-system-design-for-interviews)
 - [Progress](#progress)
 - [About](#about)
@@ -115,87 +116,102 @@ Know ML/DL and Development already?   ──────────────
 
 ## Repository Structure
 
+Folders are named `Phase_N <Title>` (with spaces) on disk. Each phase pairs a
+topic-named article (the theory) with a small, runnable project (the
+practice) — there is no separate `ARTICLE.md`, the article *is* the
+topic-named `.md` file.
+
 ```
-ai-engineer-roadmap/
+AI-Engineering-Bootcamp/
 ├── README.md                          ← this file
 │
-├── phase00-foundations/
-│   ├── part1-dev-environment/
-│   │   ├── README.md                  
+├── Phase_0 Prerequisites/
+│   ├── README.md                      ← index of all 6 parts
+│   ├── Part-1 Dev Environment/
+│   │   ├── dev_environment_and_tools.md
 │   │   ├── cheatsheet.md
 │   │   └── check_setup.py
-│   ├── part4-apis-and-the-web/
-│   │   ├── README.md
+│   ├── Part-2 & 3 Python Fundamentals/
+│   │   └── Python_fundamentals.md     ← scoped pointer to an external Python course
+│   ├── Part-4 Command Line and APIs/
+│   │   ├── Command_line_APIs_the_Web.md
 │   │   ├── api_demo.py
-│   │   ├── .env.example
-│   │   └── advice_solution.py
-│   ├── part5-ai-primer/
-│   │   ├── README.md
-│   │   └── embedding_toy.py
-│   └── part6-capstone/
-│       ├── README.md
+│   │   ├── advice_solution.py
+│   │   └── .env.example
+│   ├── Part-5 No-Math AI Basics/
+│   │   ├── AI_Primer.md
+│   │   └── Embedding_example.py
+│   └── Part-6 Final Checkpoint/
+│       ├── Checkpoint.md
 │       └── advice_journal.py
 │
-├── phase01-llm-api-foundations/
-│   ├── ARTICLE.md
+├── Phase_1 LLM APIs/
+│   ├── llm_api_foundations.md
 │   ├── README.md                      (project-specific quick start)
 │   ├── llm_client.py
 │   ├── demo.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── .env.example
 │
-├── phase02-prompt-engineering/
-│   ├── ARTICLE.md
+├── Phase_2 Prompt Engineering/
+│   ├── prompt_engineering.md
 │   ├── README.md
 │   ├── extractor.py
 │   ├── models.py
 │   ├── demo.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── .env.example
 │
-├── phase03-langchain-orchestration/
-│   ├── ARTICLE.md
+├── Phase_3 Langchain Orchestration/
+│   ├── langchain_orchestration.md
 │   ├── README.md
 │   ├── doc_chat.py
 │   ├── demo.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── .env.example
 │
-├── phase04-rag-vector-databases/
-│   ├── ARTICLE.md
+├── Phase_4 RAG & Vector Databases/
+│   ├── rag_vector_databases.md
 │   ├── README.md
 │   ├── rag_engine.py
 │   ├── app.py
 │   ├── demo.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── .env.example
 │
-├── phase05-ai-agents-langgraph/
-│   ├── ARTICLE.md
+├── Phase_5 AI Agents & LangGraph/
+│   ├── ai_agents_langgraph.md
 │   ├── README.md
 │   ├── tools.py
 │   ├── research_agent.py
 │   ├── demo.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── .env.example
 │
-├── phase06-multi-agent-systems/
-│   ├── ARTICLE.md
+├── Phase_6 Multi-Agent Systems/
+│   ├── multi_agent_systems.md
 │   ├── README.md
 │   ├── agents.py
 │   ├── tasks.py
 │   ├── tools.py
 │   ├── content_factory.py
 │   ├── demo.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── .env.example
 │
-├── phase07-fine-tuning-customization/
-│   ├── ARTICLE.md
+├── Phase_7 Fine-Tuning & Customization/
+│   ├── fine_tuning_customization.md
 │   ├── README.md
 │   ├── dataset_prep.py
 │   ├── train.py
 │   ├── evaluate.py
 │   ├── inference_api.py
 │   ├── demo_client.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── .env.example
 │
-├── phase08-production-deployment/
-│   ├── ARTICLE.md
+├── Phase_8 Production & Deployment/
+│   ├── production_deployment.md
 │   ├── README.md
 │   ├── rag_service.py
 │   ├── main.py
@@ -206,29 +222,30 @@ ai-engineer-roadmap/
 │   ├── Dockerfile
 │   ├── Dockerfile.streamlit
 │   ├── docker-compose.yml
-│   ├── .env.example
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── .env.example
 │
-└── bonus-ai-system-design/
-    ├── part1-framework-and-tradeoffs.md
-    └── part2-architecture-patterns.md
+└── Bonus AI System Design/
+    ├── framework_and_tradeoffs.md
+    └── architecture_patterns.md
 ```
 
 ## How to Use This Repo
 
 ```bash
 # 1. Clone it
-git clone https://github.com/yourusername/ai-engineer-roadmap.git
-cd ai-engineer-roadmap
+git clone https://github.com/yourusername/AI-Engineering-Bootcamp.git
+cd AI-Engineering-Bootcamp
 
 # 2. Pick your starting point
-#    - No tech background?      → start in phase0-foundations/part1-dev-environment/
-#    - Know ML/DL already?      → start in phase01-llm-api-foundations/
+#    - No tech background?      → start in "Phase_0 Prerequisites/"
+#    - Know ML/DL already?      → start in "Phase_1 LLM APIs/"
 
 # 3. For any phase folder:
-cd phase01-llm-api-foundations
+cd "Phase_1 LLM APIs"
 
-#    a. Read ARTICLE.md first — the theory, trade-offs, and full explanations
+#    a. Read the topic-named .md article first — the theory, trade-offs,
+#       and full explanations (e.g. llm_api_foundations.md)
 #    b. Set up the environment
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
@@ -239,8 +256,9 @@ cp .env.example .env            # fill in your API keys
 python demo.py
 ```
 
-Each phase's `README.md` has phase-specific setup details (some phases need
-extra steps — Phase 07 needs a GPU/Colab, Phase 08 has a Docker option).
+Each phase's own `README.md` has the exact filenames and any phase-specific
+setup steps (Phase 07 needs a GPU/Colab, Phase 08 has a Docker option) — it's
+the authoritative quick-start for that phase, more so than this table.
 
 ## Capstone Projects at a Glance
 
@@ -255,6 +273,20 @@ extra steps — Phase 07 needs a GPU/Colab, Phase 08 has a Docker option).
 | 07 | Domain Expert Fine-tune | Run in Colab - fine-tune Llama-3-8B, evaluate vs base model |
 | 08 | Production AI Service | `docker-compose up` - a full containerized, observable AI backend + frontend |
 
+## Practice Projects
+
+The phases above are practiced one at a time. These three combine adjacent
+phases into a single project each, so you get real end-to-end reps chaining
+skills together — the way a real feature actually needs them. Each imports
+the relevant phase's code directly rather than duplicating it, and increases
+in scope from the last.
+
+| Project | Combines | What it builds | Try it |
+|---|---|---|---|
+| [`Project_1 Smart Inbox Triage`](Project_1%20Smart%20Inbox%20Triage/README.md) | Phase 1 + 2 | Extracts structured fields from support tickets, then drafts a reply with multi-provider fallback and cost tracking | `python demo.py` |
+| [`Project_2 Research Copilot`](Project_2%20Research%20Copilot/README.md) | Phase 3 + 4 + 5 | Multi-turn chat over your own documents that falls back to live web research when local retrieval isn't confident | `python demo.py` |
+| [`Project_3 Autonomous Content Desk`](Project_3%20Autonomous%20Content%20Desk/README.md) | Phase 6 + 7 + 8 | A FastAPI service fronting the multi-agent content crew, plus a fine-tune-vs-general-agent comparison endpoint, with a content-quality evaluation gate | `docker-compose up --build` |
+
 ## Bonus: AI System Design for Interviews
 
 Beyond the build-it phases, this repo includes a system design series for
@@ -263,15 +295,15 @@ and worked examples that come up in design rounds:
 
 - **Part 1 - Framework & Trade-off Vocabulary** *(available)*: the 7-step
   interview framework, 8 core trade-off dimensions, latency/cost
-  back-of-envelope math
+  back-of-envelope math — [`framework_and_tradeoffs.md`](Bonus%20AI%20System%20Design/framework_and_tradeoffs.md)
 - **Part 2 - Architecture Pattern Library** *(available)*: the RAG
   architecture spectrum (naive → advanced → agentic), agent/multi-agent
   patterns, caching architecture, safety/guardrail layers, the monitoring
-  stack, and a combined reference architecture
+  stack, and a combined reference architecture — [`architecture_patterns.md`](Bonus%20AI%20System%20Design/architecture_patterns.md)
 - Part 3 - Worked interview examples *(planned)*
 - Part 4 - Rapid-fire trade-off Q&A *(planned)*
 
-See `bonus-ai-system-design/`.
+See `Bonus AI System Design/`.
 
 ## Progress
 

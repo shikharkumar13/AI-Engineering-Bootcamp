@@ -107,7 +107,7 @@ class EmbeddingModel:
         print(f"  Loading embedding model: {model_name} ...")
         self.model      = SentenceTransformer(model_name)
         self.model_name = model_name
-        self.dim        = self.model.get_sentence_embedding_dimension()
+        self.dim        = self.model.get_embedding_dimension()
         print(f"  ✓ Embedding model ready (dim={self.dim})")
 
     def embed(self, texts: list[str], is_query: bool = False) -> np.ndarray:

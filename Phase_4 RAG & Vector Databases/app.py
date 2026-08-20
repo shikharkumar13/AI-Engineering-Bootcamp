@@ -13,8 +13,8 @@ Features:
   - Indexing stats in the sidebar
 """
 
-import os
 import tempfile
+from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -234,7 +234,3 @@ if show_sources and col_sources:
                 "Total indexed chunks",
                 st.session_state.engine.stats()["total_chunks"]
             )
-
-# ── Missing Path import ─────────────────────────────────────────────────────────
-
-from pathlib import Path  # needed for sidebar display

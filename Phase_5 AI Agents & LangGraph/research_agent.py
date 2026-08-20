@@ -5,7 +5,8 @@ Takes a topic, searches the web, reads sources, tracks findings, and produces
 a structured research report with citations.
 
 Demonstrates all Phase 05 concepts:
-  - ReAct pattern via LangGraph's prebuilt ToolNode + tools_condition
+  - ReAct pattern via LangGraph's prebuilt ToolNode, with a custom step-limit-aware
+    routing function in place of the prebuilt tools_condition (see _should_continue)
   - Custom tool registration (tools.py)
   - StateGraph with reducers for message accumulation
   - Checkpointer-based memory across turns
@@ -14,7 +15,6 @@ Demonstrates all Phase 05 concepts:
   - Structured final report generation
 """
 
-import time
 from typing import Annotated, TypedDict, Literal
 from dataclasses import dataclass, field
 
@@ -22,16 +22,14 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
-from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.prebuilt import ToolNode
 from langgraph.checkpoint.memory import MemorySaver
 
-from phase05_tools import ALL_TOOLS, get_notes_store, reset_notes
+from tools import ALL_TOOLS, get_notes_store, reset_notes
 
 load_dotenv()
 
@@ -161,24 +159,41 @@ class ResearchAgent:
     def _tools_node(self, state: AgentState) -> dict:
         """Execute requested tools, with loop guard protection."""
         last_message = state["messages"][-1]
-        tool_node = ToolNode(ALL_TOOLS)
 
-        # Check for stuck loops before executing
+        # Check every requested call for a stuck loop before executing anything.
+        stuck_reasons: dict[str, str] = {}
         for tool_call in last_message.tool_calls:
             stuck, reason = self.loop_guard.check(tool_call["name"], tool_call["args"])
             if stuck:
-                from langchain_core.messages import ToolMessage
-                return {
-                    "messages": [
-                        ToolMessage(
-                            content=f"LOOP DETECTED: {reason}. Please try a different "
-                                    f"approach or conclude with available information.",
-                            tool_call_id=tool_call["id"],
-                        )
-                    ]
-                }
+                stuck_reasons[tool_call["id"]] = reason
 
-        return tool_node.invoke(state)
+        if not stuck_reasons:
+            return ToolNode(ALL_TOOLS).invoke(state)
+
+        # At least one call is stuck. The model still expects a ToolMessage for
+        # *every* tool_call_id in the preceding AIMessage — leaving any of them
+        # unanswered makes the next API call to OpenAI fail — so run the
+        # non-stuck calls directly and synthesize a message for the stuck ones.
+        from langchain_core.messages import ToolMessage
+        tools_by_name = {t.name: t for t in ALL_TOOLS}
+        messages = []
+        for tool_call in last_message.tool_calls:
+            if tool_call["id"] in stuck_reasons:
+                messages.append(ToolMessage(
+                    content=f"LOOP DETECTED: {stuck_reasons[tool_call['id']]}. Please try "
+                            f"a different approach or conclude with available information.",
+                    tool_call_id=tool_call["id"],
+                ))
+            else:
+                tool_fn = tools_by_name[tool_call["name"]]
+                result = tool_fn.invoke(tool_call["args"])
+                messages.append(ToolMessage(
+                    content=str(result),
+                    name=tool_call["name"],
+                    tool_call_id=tool_call["id"],
+                ))
+
+        return {"messages": messages}
 
     def _should_continue(self, state: AgentState) -> Literal["continue", "end"]:
         """Decide whether to keep looping or stop."""
@@ -233,8 +248,6 @@ class ResearchAgent:
 
             if verbose and step_info["summary"]:
                 print(f"  {step_info['type']}: {step_info['summary'][:150]}")
-
-        final_message = transcript[-1] if transcript else None
 
         return {
             "topic": topic,

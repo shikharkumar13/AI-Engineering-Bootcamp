@@ -233,6 +233,14 @@ to your current plan's features until then.
 """
 
 
+def test_no_regression():
+    """pytest entry point: `pytest evaluation.py -v` collects this (and, before
+    this function existed, nothing else in this file — pytest only discovers
+    `test_*` functions/classes, so the invocation silently ran zero tests
+    despite exiting 0). Fails the test if main() reports a regression."""
+    assert main(), "RAGAS regression detected — see the printed report above."
+
+
 if __name__ == "__main__":
     success = main()
     exit(0 if success else 1)

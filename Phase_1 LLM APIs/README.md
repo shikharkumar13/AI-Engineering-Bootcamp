@@ -6,23 +6,26 @@ single unified interface, with streaming, cost tracking, retries, and async supp
 
 ## Project structure
 ```
-phase01_project/
+Phase_1 LLM APIs/
 ├── llm_client.py    ← the library (this is your project)
-├── phase01_demo.py          ← shows all features
-├── phase01_requirements.txt
-└── .env             ← your API keys (create this!)
+├── demo.py          ← shows all features
+├── requirements.txt
+└── .env.example     ← copy to .env and fill in your API keys
 ```
 
 ## Quick start
 
 ### 1. Install dependencies
 ```bash
-pip install -r phase01_requirements.txt
+pip install -r requirements.txt
 ```
 
 ### 2. Create your .env file
 ```bash
-# .env
+cp .env.example .env
+```
+`.env.example` contains:
+```bash
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 GOOGLE_API_KEY=AIza...
@@ -30,7 +33,7 @@ GOOGLE_API_KEY=AIza...
 
 ### 3. Run the demo
 ```bash
-python phase01_demo.py
+python demo.py
 ```
 
 ## API reference
@@ -71,7 +74,7 @@ client.stats.report()
 | File | Concepts covered |
 |------|-----------------|
 | `llm_client.py` | All 5 Phase 01 topics integrated |
-| `phase01_demo.py` | How to use the client in real scenarios |
+| `demo.py` | How to use the client in real scenarios |
 
 ## Skills demonstrated (for your portfolio/resume)
 - Multi-provider LLM integration (OpenAI, Anthropic, Google)

@@ -38,7 +38,7 @@ from slowapi.errors import RateLimitExceeded
 from openai import RateLimitError, APITimeoutError, APIError
 
 from rag_service import RAGService
-from observability import traced_ask, record_feedback, get_current_trace_id, flush
+from observability import traced_ask, record_feedback, flush
 
 load_dotenv()
 
@@ -187,7 +187,7 @@ async def chat(
 ):
     """Non-streaming chat endpoint — full RAG answer with sources, traced."""
     try:
-        answer = traced_ask(rag_service, chat_request.message, chat_request.k, user_id=api_key)
+        answer, trace_id = traced_ask(rag_service, chat_request.message, chat_request.k, user_id=api_key)
 
         return ChatResponse(
             answer=answer.answer,
@@ -195,7 +195,7 @@ async def chat(
                       "excerpt": s.text[:200]} for s in answer.sources],
             num_chunks=answer.num_chunks,
             latency_s=answer.latency_s,
-            trace_id=get_current_trace_id(),
+            trace_id=trace_id,
         )
 
     except RuntimeError as e:
@@ -236,7 +236,9 @@ async def chat_stream(
             logger.exception("Error during streaming")
             yield f"\n[ERROR: {e}]"
 
-    return StreamingResponse(token_stream(), media_type="text/event-stream")
+    # NOTE: this yields raw text chunks, not real Server-Sent Events framing
+    # (SSE requires "data: <payload>\n\n" per event) — media_type reflects that.
+    return StreamingResponse(token_stream(), media_type="text/plain")
 
 
 @app.post("/feedback")

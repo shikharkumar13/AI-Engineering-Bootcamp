@@ -14,6 +14,7 @@ Demonstrates:
   8. Session stats and history inspection
 """
 
+import os
 import time
 import textwrap
 from pathlib import Path
@@ -349,8 +350,6 @@ def demo_8_langsmith():
 # ─────────────────────────────────────────────────────────────────────────────
 # Run all demos
 # ─────────────────────────────────────────────────────────────────────────────
-
-import os
 
 if __name__ == "__main__":
     print(f"\n{DIVIDER}")

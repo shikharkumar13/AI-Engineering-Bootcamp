@@ -1,4 +1,4 @@
-# phase00_part1_check_setup.py
+# check_setup.py
 #
 # A small script that checks your environment is set up correctly.
 # You haven't learned Python syntax yet (that's Part 2!) — so for now,
@@ -10,8 +10,8 @@
 #      (venv) at the start of your terminal prompt.
 #   2. Put this file inside your project folder.
 #   3. Run it:
-#        python phase00_part1_check_setup.py     (Windows)
-#        python3 phase00_part1_check_setup.py    (Mac)
+#        python check_setup.py     (Windows)
+#        python3 check_setup.py    (Mac)
 
 import sys
 import os

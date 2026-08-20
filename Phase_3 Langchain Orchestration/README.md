@@ -8,20 +8,24 @@ A multi-turn Q&A system over any document (PDF, text, URL, CSV) with:
 
 ## Project structure
 ```
-phase03_project/
+Phase_3 Langchain Orchestration/
 ├── doc_chat.py      ← DocChat class + standalone LCEL demos
-├── phase03_demo.py          ← 8 demo scenarios
-└── phase03_requirements.txt
+├── demo.py          ← 8 demo scenarios
+└── requirements.txt
 ```
 
 ## Quick start
 
 ### 1. Install
 ```bash
-pip install -r phase03_requirements.txt
+pip install -r requirements.txt
 ```
 
 ### 2. Configure .env
+```bash
+cp .env.example .env   # then fill in your keys
+```
+`.env.example` contains:
 ```bash
 OPENAI_API_KEY=sk-...
 
@@ -33,7 +37,7 @@ LANGCHAIN_PROJECT=phase03-doc-chat
 
 ### 3. Run
 ```bash
-python phase03_demo.py
+python demo.py
 ```
 
 ## API reference
@@ -90,4 +94,4 @@ chat.session_stats()
 this either truncates (losing content) or exceeds the context window limit.
 
 **Phase 04 (RAG)** solves this by indexing documents in a vector database and
-retrieving only the relevant chunks for each question — no context window limit.
+retrieving only the relevant chunks for each question, with no context window limit.

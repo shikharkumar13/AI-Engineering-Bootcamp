@@ -1,6 +1,6 @@
 # Phase 02 — Prompt Engineering
 
-> **Prerequisites:** Phase 01 complete — you can call OpenAI, Claude, and Gemini APIs.  
+> **Prerequisites:** Phase 01 complete. You can call OpenAI, Claude, and Gemini APIs.  
 > **What you'll learn:** Zero-shot, few-shot, and Chain-of-Thought prompting; structured
 > outputs; function calling; system prompts and Jinja2 templates.  
 > **Project:** A pipeline that reads unstructured text and returns validated JSON.
@@ -28,14 +28,14 @@ prompt is not.** The same underlying model can answer brilliantly or poorly depe
 entirely on how you phrase the request.
 
 Prompt engineering is the practice of designing inputs to LLMs to reliably get the
-outputs you want. It has the highest return on investment of any AI skill — a better
+outputs you want. It has the highest return on investment of any AI skill: a better
 prompt can improve accuracy dramatically with zero extra compute, zero extra cost, and
 zero extra infrastructure.
 
 **From your ML background:** Think of prompting as selecting the right "region of
 behavior" from a model that has been trained on a vast distribution of text. The model
 has learned to respond to patterns. Your prompt is the pattern that activates the
-behavior you want. Few-shot examples are not random — they shift the probability
+behavior you want. Few-shot examples are not random: they shift the probability
 distribution of the model's output toward the pattern you demonstrate.
 
 **What this phase covers in production contexts:**
@@ -130,7 +130,7 @@ for review in reviews:
 ```
 
 **Why few-shot works:** The model is not "learning" from the examples in the traditional
-ML sense — its weights are not being updated. Instead, the examples are part of the
+ML sense; its weights are not being updated. Instead, the examples are part of the
 context the model attends to. They establish a clear pattern: given this type of input,
 this is the expected format of output. The model's in-context learning ability lets it
 generalize this pattern to new inputs.
@@ -139,7 +139,7 @@ generalize this pattern to new inputs.
 
 ### 2.3 One-shot prompting
 
-One-shot is exactly what it sounds like — one example. It is less about improving
+One-shot is exactly what it sounds like: one example. It is less about improving
 accuracy and more about showing the model the **exact format** of output you want.
 
 ```python
@@ -252,7 +252,7 @@ the problem.
 
 ### 3.2 Zero-shot CoT — "Think step by step"
 
-The simplest CoT technique — just ask the model to reason before answering.
+The simplest CoT technique: just ask the model to reason before answering.
 
 ```python
 def zero_shot_cot(problem: str) -> str:
@@ -579,8 +579,6 @@ def extract_with_schema(text: str) -> PersonInfo:
     The response is guaranteed to match PersonInfo — no validation needed.
     """
     
-    from openai.lib._parsing import type_to_response_format_param
-    
     response = client.beta.chat.completions.parse(
         model="gpt-4o-mini",
         messages=[
@@ -612,7 +610,7 @@ Even without structured outputs, Pydantic lets you validate and coerce model out
 It is the backbone of reliable data extraction.
 
 ```python
-from pydantic import BaseModel, Field, validator, field_validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from enum import Enum
 
@@ -690,7 +688,7 @@ The flow:
 6. (Optional) You send the result back to the model for a follow-up response
 ```
 
-In Phase 02, we stop at step 5 — we use function calling purely for **structured
+In Phase 02, we stop at step 5: we use function calling purely for **structured
 extraction**. In Phase 05 (Agents), you will complete the loop by returning results to
 the model.
 
@@ -841,7 +839,7 @@ extract_tool = {
 
 def extract_email_claude(email_text: str) -> dict:
     response = anthropic_client.messages.create(
-        model="claude-3-5-haiku-20241022",
+        model="claude-haiku-4-5-20251001",
         max_tokens=1024,
         tools=[extract_tool],
         tool_choice={"type": "tool", "name": "extract_email_data"},
@@ -988,7 +986,7 @@ print(result.model_dump_json(indent=2))  # → formatted JSON string
 
 ### 6.3 Nested Pydantic models
 
-instructor handles nested models seamlessly — any complexity that Pydantic supports,
+instructor handles nested models seamlessly. Any complexity that Pydantic supports,
 instructor can extract:
 
 ```python
@@ -1039,7 +1037,7 @@ for item in result.action_items:
 
 ### 6.4 instructor with Claude
 
-instructor works with Anthropic too — just patch a different client:
+instructor works with Anthropic too: just patch a different client.
 
 ```python
 import instructor
@@ -1050,7 +1048,7 @@ anthropic_client = instructor.from_anthropic(Anthropic())
 
 def extract_with_claude(text: str, output_model) -> BaseModel:
     return anthropic_client.messages.create(
-        model="claude-3-5-haiku-20241022",
+        model="claude-haiku-4-5-20251001",
         max_tokens=1024,
         messages=[{"role": "user", "content": text}],
         response_model=output_model,
@@ -1139,7 +1137,7 @@ Output: Respond only with the requested structured format. No preamble."""
 
 ### 7.2 System prompt patterns
 
-**The Persona Pattern** — Give the model a specific identity:
+**The Persona Pattern:** give the model a specific identity.
 
 ```python
 persona_system = """You are a senior software engineer at a Fortune 500 company
@@ -1149,7 +1147,7 @@ You prefer simplicity over cleverness.
 You always consider edge cases and mention potential issues."""
 ```
 
-**The Output Format Pattern** — Specify format exactly:
+**The Output Format Pattern:** specify format exactly.
 
 ```python
 format_system = """You analyze technical documents and produce summaries.
@@ -1167,7 +1165,7 @@ COMPLEXITY LEVEL: [Beginner / Intermediate / Advanced]
 RECOMMENDED BACKGROUND: [What the reader should know first]"""
 ```
 
-**The Constraint Pattern** — Specify what NOT to do:
+**The Constraint Pattern:** specify what NOT to do.
 
 ```python
 constraint_system = """You classify customer support tickets into categories.
@@ -1186,8 +1184,8 @@ Rules:
 
 ### 7.3 Jinja2 for dynamic prompt templates
 
-As your prompts get more complex — with conditional sections, loops, and variable
-substitution — f-strings become unmaintainable. Jinja2 is the standard templating
+As your prompts get more complex, with conditional sections, loops, and variable
+substitution, f-strings become unmaintainable. Jinja2 is the standard templating
 engine for this.
 
 ```bash
@@ -1329,8 +1327,8 @@ prompt = library.render(
 
 ### 7.6 Few-shot examples in templates
 
-This is a common production pattern — store your few-shot examples in a list and render
-them into the template:
+This is a common production pattern: store your few-shot examples in a list and render
+them into the template.
 
 ```python
 from jinja2 import Template
@@ -1428,7 +1426,7 @@ After completing this phase, you understand:
 2. **Few-shot calibrates format, not just accuracy.** Examples show the model exactly
    what output structure you want, not just what the right answer is.
 
-3. **CoT is "Let's think step by step" — but understand why it works.** Generated
+3. **CoT is "Let's think step by step," but understand why it works.** Generated
    reasoning tokens become context for subsequent tokens. The model attends over its
    own reasoning when producing the final answer.
 
@@ -1465,18 +1463,21 @@ to first reason about: the severity of the issue, what department can resolve it
 whether it needs immediate attention. Then output a structured routing decision. Compare
 accuracy with and without CoT reasoning.
 
-### Exercise 3 — Multi-type Extractor (Medium)
-Extend the `DataExtractor` class to auto-detect document type (email, job posting,
-news article, meeting notes) from the text, then apply the appropriate Pydantic model.
-The output should always include the detected `document_type` plus the extracted fields
-for that type.
+### Exercise 3 — Add a New Document Type (Medium)
+The project's `DataExtractor` already auto-detects document type and routes to the right
+Pydantic model (see `auto_extract` in `extractor.py`); study that implementation first.
+Then add a sixth type it doesn't yet handle: a support ticket (fields might include
+`ticket_id`, `customer_name`, `issue_summary`, `category`, `priority`, `resolved: bool`).
+Define the Pydantic model, add an `extract_support_ticket` method, and wire it into both
+`auto_extract`'s type map and the `DETECT_TYPE_TEMPLATE` prompt. Confirm `auto_extract`
+correctly classifies a sample support ticket alongside the other five types.
 
 ```python
-# Target interface
+# Existing interface (dict-based, not attribute access)
 extractor = DataExtractor()
 result = extractor.auto_extract(some_text)
-# result.document_type → "email"
-# result.data → EmailData instance
+# result["document_type"] → "support_ticket"
+# result["data"] → SupportTicket instance
 ```
 
 ### Exercise 4 — Prompt Template Library (Hard)
@@ -1489,6 +1490,6 @@ Build a `PromptLibrary` class that:
 
 ---
 
-*Next: Phase 03 — LangChain & Orchestration*  
+*Next: Phase 03, LangChain & Orchestration*  
 *You will build reusable LLM pipelines with chains, add conversation memory,
 process documents at scale, and trace every call in LangSmith.*

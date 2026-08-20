@@ -1,6 +1,6 @@
 # Phase 07 — Fine-tuning & Customization
 
-> **Prerequisites:** Phases 01–06 complete, plus your existing knowledge of neural
+> **Prerequisites:** Phases 01-06 complete, plus your existing knowledge of neural
 > network training (backprop, gradient descent, loss functions).  
 > **What you'll learn:** When to fine-tune vs prompt vs RAG; the Hugging Face ecosystem;
 > the math and intuition behind LoRA/QLoRA; fast training with Unsloth; evaluating a
@@ -8,7 +8,7 @@
 > **Project:** Fine-tune Llama 3 8B on a niche domain using QLoRA + Unsloth, evaluate
 > against the base model, push to Hugging Face Hub, and serve via API.
 
-> **Hardware note:** Unlike Phases 01–06, this phase requires a GPU. A free Google
+> **Hardware note:** Unlike Phases 01-06, this phase requires a GPU. A free Google
 > Colab T4 GPU (16GB VRAM) is sufficient for everything in this phase thanks to QLoRA's
 > memory efficiency. The project code is written to run directly in Colab.
 
@@ -41,8 +41,8 @@ RAG               — Change what the model can see. Model weights are untouched
 FINE-TUNING       — Change the model's weights themselves via further training.
 ```
 
-**From your ML background:** Fine-tuning is exactly what it sounds like to you already
-— continuing the training process on a pretrained model, except now the "pretrained
+**From your ML background:** Fine-tuning is exactly what it sounds like to you already:
+continuing the training process on a pretrained model, except now the "pretrained
 model" is a full LLM and the new training data is your domain-specific examples. The
 forward pass, loss computation, and backward pass are the same mechanisms you already
 know. What's new in this phase is making that training computationally feasible on
@@ -66,7 +66,7 @@ powerful but also the most expensive, slowest-to-iterate, and easiest-to-misuse 
 | Model needs to understand a highly specialized vocabulary/jargon deeply | Fine-tuning (sometimes combined with RAG) | Domain vocabulary saturation is hard to achieve with few-shot alone |
 
 **The most common mistake newcomers make:** reaching for fine-tuning to add knowledge
-("teach the model about our company's products"). This is almost always wrong — that's
+("teach the model about our company's products"). This is almost always wrong; that's
 what RAG is for. Fine-tuning teaches a model **how to behave**, not **what facts to
 know**. A fine-tuned model without RAG will still hallucinate facts; it will just
 hallucinate them in a more consistent style.
@@ -88,14 +88,14 @@ Imagine you want an AI assistant that answers legal questions about your company
 specific contracts.
 
 - **Wrong approach:** Fine-tune a model on your contracts so it "knows" them.
-  Contracts change. Fine-tuning teaches patterns, not facts — the model will produce
+  Contracts change. Fine-tuning teaches patterns, not facts: the model will produce
   plausible-sounding but potentially incorrect contract details (hallucination risk is
   not reduced by fine-tuning on facts).
 
 - **Right approach:** Use RAG to retrieve the actual relevant contract clauses for each
   question (Phase 04). Optionally, fine-tune the model on examples of how a legal
-  assistant should *phrase* answers — formal tone, always citing the specific clause
-  number, always flagging ambiguity — because that is a *behavioral* pattern, not a
+  assistant should *phrase* answers (formal tone, always citing the specific clause
+  number, always flagging ambiguity), because that is a *behavioral* pattern, not a
   fact, and few-shot prompting alone might not consistently enforce it across thousands
   of varied questions.
 
@@ -108,7 +108,7 @@ the model to update.
 
 **Full fine-tuning:** Update every parameter in the model. For an 8B parameter model,
 this means optimizing 8 billion weights, which requires storing gradients and optimizer
-states for all of them — roughly 4x the model's base memory footprint (weights +
+states for all of them: roughly 4x the model's base memory footprint (weights +
 gradients + two Adam optimizer moments). An 8B model in fp16 needs ~16GB just for
 weights; full fine-tuning needs ~60-80GB of VRAM. This requires multiple high-end GPUs.
 
@@ -135,9 +135,9 @@ infrastructure.
 Hugging Face is the central hub for open-source ML models, datasets, and training
 tooling. Three libraries matter for this phase:
 
-- **`transformers`** — load and run any open-source model with a unified API
-- **`datasets`** — load, process, and stream training datasets efficiently
-- **`Hub`** — host and share models/datasets (like GitHub, but for ML artifacts)
+- **`transformers`:** load and run any open-source model with a unified API
+- **`datasets`:** load, process, and stream training datasets efficiently
+- **`Hub`:** host and share models/datasets (like GitHub, but for ML artifacts)
 
 ```bash
 pip install transformers datasets huggingface_hub
@@ -185,7 +185,7 @@ print(response)
 ```
 
 **`AutoModelForCausalLM` / `AutoTokenizer`:** The "Auto" classes inspect the model's
-config and automatically load the right architecture class and tokenizer — you don't
+config and automatically load the right architecture class and tokenizer: you don't
 need to know whether a model is LLaMA, Mistral, or Qwen architecture; the same loading
 code works for all of them.
 
@@ -193,8 +193,8 @@ code works for all of them.
 
 ### 2.3 The `datasets` library
 
-Training data for fine-tuning needs to be loaded, formatted, and tokenized efficiently
-— often without fitting entirely in RAM. The `datasets` library handles this with
+Training data for fine-tuning needs to be loaded, formatted, and tokenized efficiently,
+often without fitting entirely in RAM. The `datasets` library handles this with
 memory-mapped, streaming-capable dataset objects.
 
 ```python
@@ -262,7 +262,7 @@ formatted_dataset = my_dataset.map(format_example)
 **Why this matters:** Each model family has a different chat template (LLaMA 3 uses
 `<|start_header_id|>`, Mistral uses `[INST]`, etc.). If your training data doesn't match
 the format the model expects, you either confuse the model during training or it learns
-to ignore the special tokens it was pretrained to respect — degrading instruction-
+to ignore the special tokens it was pretrained to respect, degrading instruction-
 following ability you'd otherwise inherit for free from the base model.
 
 ---
@@ -289,7 +289,7 @@ my_dataset.push_to_hub("your-username/legal-qa-dataset")
 
 LoRA (Hu et al., 2021) is based on a key empirical observation: when you fine-tune a
 large model, the *change* in weights (the difference between the fine-tuned weights and
-the original weights) tends to have low "intrinsic rank" — meaning it can be well
+the original weights) tends to have low "intrinsic rank," meaning it can be well
 approximated by a much smaller matrix decomposition, even though the original weight
 matrix is huge.
 
@@ -297,7 +297,7 @@ matrix is huge.
 approximated as the product of two smaller matrices: `ΔW ≈ B × A`, where `B` has shape
 `(d, r)` and `A` has shape `(r, k)`, with `r` (the rank) much smaller than `d` or `k`.
 If `d = k = 4096` (a typical hidden dimension) and you choose `r = 8`, you go from
-`4096 × 4096 = 16.7M` parameters to `(4096×8) + (8×4096) = 65,536` parameters — a 256x
+`4096 × 4096 = 16.7M` parameters to `(4096×8) + (8×4096) = 65,536` parameters: a 256x
 reduction for that one weight matrix.
 
 ```
@@ -328,7 +328,7 @@ LoRA weight update:
                      rank r       rank r
 ```
 
-The original weight matrix `W` is completely frozen — no gradients flow through it, no
+The original weight matrix `W` is completely frozen: no gradients flow through it, no
 gradient computation needed, no optimizer state needed for it. Only the small matrices
 `A` and `B` are trained. During the forward pass, the output is the original frozen
 computation PLUS the low-rank adaptation:
@@ -435,7 +435,7 @@ B = 0  (all zeros)
 
 This means training starts from a model that behaves identically to the pretrained
 base model. As gradients update `A` and `B`, the adaptation gradually shifts behavior
-away from the base model's defaults — there's no "cold start" instability where the
+away from the base model's defaults; there's no "cold start" instability where the
 model briefly behaves erratically before learning useful patterns, unlike if both
 matrices were randomly initialized.
 
@@ -479,7 +479,7 @@ merged_model.save_pretrained("path/to/merged/model")
 LoRA dramatically reduces *trainable* parameters, but the frozen base model still needs
 to be loaded into memory in full precision to compute the forward and backward pass. An
 8B model in bfloat16 (2 bytes per parameter) needs `8 × 10^9 × 2 bytes = 16GB` just to
-hold the weights — before accounting for activations, gradients of the LoRA parameters,
+hold the weights, before accounting for activations, gradients of the LoRA parameters,
 and optimizer states.
 
 QLoRA (Dettmers et al., 2023) solves this by **quantizing** the frozen base model to
@@ -510,7 +510,7 @@ QLoRA specifically uses **NF4 (4-bit NormalFloat)**, a quantization scheme desig
 around the empirical observation that pretrained neural network weights tend to follow
 a roughly normal (Gaussian) distribution. NF4 allocates its limited bit budget to
 represent values more precisely where the weight distribution has more mass (near
-zero), rather than spacing quantization levels uniformly — this preserves more
+zero), rather than spacing quantization levels uniformly. This preserves more
 information than naive uniform 4-bit quantization for the same bit budget.
 
 ```python
@@ -544,7 +544,7 @@ A critical detail: QLoRA stores weights in 4-bit but **de-quantizes them to bf16
 fly** for the actual matrix multiplication during the forward/backward pass. The 4-bit
 representation is purely for storage; compute happens at higher precision to avoid
 numerical instability during training. This is why the `bnb_4bit_compute_dtype` parameter
-exists — it controls the precision used during the actual arithmetic, separate from the
+exists: it controls the precision used during the actual arithmetic, separate from the
 storage precision.
 
 ```
@@ -557,7 +557,7 @@ Result:     output computed, gradients flow only to LoRA A/B matrices (bf16)
 ```
 
 This is what makes QLoRA's quality nearly match full-precision LoRA despite the
-aggressive 4-bit compression — the model never actually computes anything in 4-bit; it
+aggressive 4-bit compression: the model never actually computes anything in 4-bit; it
 only **stores** the frozen weights that way.
 
 ---
@@ -591,7 +591,7 @@ model.print_trainable_parameters()
 # → "trainable params: 41,943,040 || all params: 8,072,204,288 || trainable%: 0.5197"
 ```
 
-This combination — 4-bit quantized frozen base + bf16 trainable LoRA adapters — is what
+This combination (4-bit quantized frozen base + bf16 trainable LoRA adapters) is what
 allows an 8B (or even 13B-70B with more aggressive settings) model to be fine-tuned on a
 single consumer GPU with 16-24GB of VRAM, hardware that would be utterly insufficient
 for full fine-tuning of the same model.
@@ -656,7 +656,7 @@ model = FastLanguageModel.get_peft_model(
 
 `use_gradient_checkpointing="unsloth"` activates Unsloth's custom gradient checkpointing
 implementation, which trades a small amount of recomputation for significant additional
-memory savings — useful for fitting longer sequences or larger batch sizes on limited
+memory savings, useful for fitting longer sequences or larger batch sizes on limited
 VRAM.
 
 ---
@@ -737,7 +737,7 @@ frozen) rest of the network.
 **Understanding gradient accumulation:** `per_device_train_batch_size=2` with
 `gradient_accumulation_steps=4` means the model processes 2 examples, computes
 gradients, processes another 2, accumulates those gradients, and so on for 4 micro-
-batches before actually updating the weights — simulating a batch size of 8 without
+batches before actually updating the weights, simulating a batch size of 8 without
 needing the memory to hold 8 examples' activations simultaneously. This is essential
 when VRAM is the binding constraint, which it usually is for LLM fine-tuning.
 
@@ -811,7 +811,7 @@ fine-tune "done."
 
 ### 6.2 Setting up a held-out evaluation set
 
-This must be data the model never saw during training — ideally collected or split
+This must be data the model never saw during training, ideally collected or split
 *before* training begins.
 
 ```python
@@ -870,7 +870,7 @@ def compare_models(base_model, finetuned_model, tokenizer, eval_examples: list[d
 ### 6.4 Using an LLM as judge
 
 For open-ended generation quality (not just exact-match accuracy), use a stronger LLM
-(e.g., GPT-4o) to score outputs — a well-established evaluation pattern called
+(e.g., GPT-4o) to score outputs: a well-established evaluation pattern called
 "LLM-as-judge."
 
 ```python
@@ -972,15 +972,15 @@ for question in general_capability_tests:
 
 Before declaring a fine-tune successful, verify:
 
-1. ✅ **Domain task quality improved** — fine-tuned model wins or ties on domain-specific
+1. ✅ **Domain task quality improved:** fine-tuned model wins or ties on domain-specific
    held-out examples (Section 6.4)
-2. ✅ **No catastrophic forgetting** — general capability tests show comparable
+2. ✅ **No catastrophic forgetting:** general capability tests show comparable
    performance to the base model (Section 6.5)
-3. ✅ **Training loss converged sensibly** — decreased steadily without erratic spikes
+3. ✅ **Training loss converged sensibly:** decreased steadily without erratic spikes
    (Section 5.6)
-4. ✅ **No obvious overfitting signs** — model doesn't just regurgitate training examples
+4. ✅ **No obvious overfitting signs:** model doesn't just regurgitate training examples
    verbatim when given slightly different phrasings of the same question
-5. ✅ **Output format consistency** — if the fine-tuning goal was format/style
+5. ✅ **Output format consistency:** if the fine-tuning goal was format/style
    consistency, verify this holds across a range of held-out prompts, not just the
    ones you eyeballed during development
 
@@ -998,15 +998,15 @@ Before declaring a fine-tune successful, verify:
    from the exact base model behavior.
 
 3. **QLoRA adds 4-bit quantization of the frozen base model**, cutting memory
-   requirements roughly 3-4x further. Computation still happens in bf16 on the fly —
-   only storage is 4-bit — preserving training stability.
+   requirements roughly 3-4x further. Computation still happens in bf16 on the fly;
+   only storage is 4-bit, preserving training stability.
 
 4. **Unsloth provides the same QLoRA math with custom optimized kernels**, roughly
    2x faster and using less VRAM, with no accuracy tradeoff. It's the practical tool
    of choice for fine-tuning on consumer/free-tier GPUs (e.g., Colab T4).
 
 5. **Match your training data format to the model's chat template.** Use
-   `tokenizer.apply_chat_template()` rather than hand-rolling a format — mismatched
+   `tokenizer.apply_chat_template()` rather than hand-rolling a format: mismatched
    formats degrade the instruction-following ability the base model already has.
 
 6. **The LoRA learning rate (~2e-4) is higher than full fine-tuning rates (~2e-5)**
@@ -1032,14 +1032,14 @@ for each. Plot rank vs evaluation quality.
 Build a standardized "general capability" test suite of 15 questions spanning coding,
 math, general knowledge, and reasoning. Write a function that runs this suite against
 any fine-tuned model and the base model, scores both with an LLM judge, and flags any
-question where the fine-tuned model's score dropped by more than 2 points — a signal
+question where the fine-tuned model's score dropped by more than 2 points, a signal
 of forgetting on that specific capability.
 
 ### Exercise 3 — Dataset Size Curve (Medium-Hard)
 Using the same hyperparameters, fine-tune on subsets of your dataset: 50, 200, 500, and
 all available examples. Evaluate each resulting model on the same held-out set. Plot
 dataset size vs evaluation win-rate against the base model. Identify the point of
-diminishing returns — where adding more data stops meaningfully improving quality.
+diminishing returns: where adding more data stops meaningfully improving quality.
 
 ### Exercise 4 — Merge vs Adapter Inference Benchmark (Hard)
 Benchmark inference latency and memory usage for: (a) the base model + LoRA adapter
@@ -1049,7 +1049,7 @@ average latency, peak memory, and confirm the outputs are functionally equivalen
 
 ---
 
-*Next: Phase 08 — Production & Deployment*  
+*Next: Phase 08, Production & Deployment*  
 *You will containerize your AI services, build FastAPI backends with streaming,
-add automated evaluation with RAGAS, and set up observability with Langfuse —
+add automated evaluation with RAGAS, and set up observability with Langfuse,
 closing the gap between a working prototype and a production-ready product.*
