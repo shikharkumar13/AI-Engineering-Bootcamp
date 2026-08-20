@@ -109,11 +109,12 @@ Know ML/DL and Development already?   ──────────────
 |---|---|
 | LLM provider SDKs | `openai`, `anthropic`, `google-generativeai` |
 | Structured output & validation | `pydantic`, `instructor`, `jinja2` |
-| Orchestration & agents | `langchain`, `langgraph`, `crewai` |
+| Orchestration & agents | `langchain`, `langchain-community`, `langchain-experimental`, `langgraph`, `langgraph-checkpoint-sqlite`, `crewai`, `crewai-tools` |
 | RAG & vector search | `chromadb`, `sentence-transformers`, `rank-bm25`, `pypdf`, `beautifulsoup4` |
-| Fine-tuning | `transformers`, `datasets`, `peft`, `trl`, `bitsandbytes`, `unsloth` |
-| Production & evaluation | `fastapi`, `uvicorn`, `slowapi`, `streamlit`, `ragas`, `deepeval`, `langfuse`, `langsmith`, Docker |
-| Cross-cutting | `tenacity`, `tiktoken`, `httpx`, `python-dotenv` |
+| Web search & agent tools | `tavily-python`, `numexpr` |
+| Fine-tuning (GPU/Colab only) | `unsloth`, `torch`, `transformers`, `datasets`, `trl`, `peft`, `accelerate`, `bitsandbytes`, `huggingface_hub` |
+| Production & evaluation | `fastapi`, `uvicorn`, `slowapi`, `python-multipart`, `streamlit`, `ragas`, `langfuse`, `langsmith`, Docker |
+| Cross-cutting | `tenacity`, `tiktoken`, `httpx`, `python-dotenv`, `numpy` |
 
 ## Repository Structure
 
