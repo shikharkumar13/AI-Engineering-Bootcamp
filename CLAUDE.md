@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A self-contained, nine-phase curriculum ("AI Engineer Roadmap") for learning to build,
 evaluate, and deploy LLM-powered products, plus a small set of Practice Projects that
 chain multiple phases together. It is **not** a single application — it is nine
-independent, runnable mini-projects (Phase 0 through Phase 8), three cross-phase practice
+independent, runnable mini-projects (Phase 0 through Phase 8), four cross-phase practice
 projects, and a two-part bonus system-design series, each in its own top-level directory
 with its own dependencies, `.env`, and entry point. There is no root-level build, lint, or
 test command that spans the whole repo; every command below is run from inside a specific
@@ -33,7 +33,8 @@ Three additional top-level directories sit alongside the phases:
 - `Bonus AI System Design/` — `framework_and_tradeoffs.md` and `architecture_patterns.md`,
   a two-part system-design-interview series referenced from the root README.
 - `Project_1 Smart Inbox Triage/`, `Project_2 Research Copilot/`,
-  `Project_3 Autonomous Content Desk/` — see "Practice Projects" below.
+  `Project_3 Autonomous Content Desk/`, `Project_4 Recipe & Meal Planner/` — see
+  "Practice Projects" below.
 
 ## Running a phase project
 
@@ -60,11 +61,12 @@ the exact entry point and any phase-specific deviation:
 
 ## Practice Projects — cross-phase, not standalone
 
-`Project_1 Smart Inbox Triage/`, `Project_2 Research Copilot/`, and
-`Project_3 Autonomous Content Desk/` each combine 2-3 adjacent phases into one project,
-increasing in scope. Critically, **they import the relevant phase's actual code directly**
-rather than duplicating logic — each project's core module (`triage.py`, `copilot_graph.py`,
-`crew.py`) does this at the top of the file:
+`Project_1 Smart Inbox Triage/`, `Project_2 Research Copilot/`,
+`Project_3 Autonomous Content Desk/`, and `Project_4 Recipe & Meal Planner/` each combine
+2-3 adjacent phases into one project. Critically, **they import the relevant phase's
+actual code directly** rather than duplicating logic — each project's core module
+(`triage.py`, `copilot_graph.py`, `crew.py`, `meal_planner.py`) does this at the top of
+the file:
 
 ```python
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -116,7 +118,9 @@ First run on a fresh checkout establishes the baseline rather than failing.
 - **Phase 2** (`extractor.py` + `models.py`) builds structured extraction on `instructor` +
   Pydantic models per document type (email, job posting, article, meeting notes, receipt).
   Project 1 imports `DataExtractor` and the shared `Priority`/`Sentiment`/`ActionItem`
-  types from here directly.
+  types from here directly. Project 4 also imports `DataExtractor`, calling its generic
+  `extract(text, output_model)` entry point against its own locally-defined Pydantic
+  models rather than the email/job-posting/etc. types defined in this phase's `models.py`.
 - **Phase 3** (`doc_chat.py`) is a LangChain LCEL chain with `RunnableWithMessageHistory`
   for multi-turn memory over loaded documents. Project 2 reuses its *memory pattern*
   (recent turns woven into the next query) rather than importing `DocChat` itself, since
@@ -124,7 +128,8 @@ First run on a fresh checkout establishes the baseline rather than failing.
 - **Phase 4** (`rag_engine.py` + `app.py`) implements hybrid retrieval (ChromaDB dense +
   BM25 sparse) with cross-encoder re-ranking and HyDE, exposed through Streamlit. Project 2
   imports `RAGEngine` directly and uses each retrieved chunk's `.score` to decide whether to
-  trust local retrieval or fall back to live web search.
+  trust local retrieval or fall back to live web search. Project 4 also imports `RAGEngine`
+  directly, for cited Q&A over a personal recipe collection.
 - **Phase 5** (`research_agent.py` + `tools.py`) is a LangGraph `StateGraph` ReAct agent
   with a SQLite checkpointer and human-in-the-loop support. Project 2 imports
   `ResearchAgent` directly as its low-confidence fallback.
