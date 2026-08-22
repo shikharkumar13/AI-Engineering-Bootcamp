@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A self-contained, nine-phase curriculum ("AI Engineer Roadmap") for learning to build,
 evaluate, and deploy LLM-powered products, plus a small set of Practice Projects that
 chain multiple phases together. It is **not** a single application — it is nine
-independent, runnable mini-projects (Phase 0 through Phase 8), four cross-phase practice
+independent, runnable mini-projects (Phase 0 through Phase 8), five cross-phase practice
 projects, and a two-part bonus system-design series, each in its own top-level directory
 with its own dependencies, `.env`, and entry point. There is no root-level build, lint, or
 test command that spans the whole repo; every command below is run from inside a specific
@@ -33,8 +33,8 @@ Three additional top-level directories sit alongside the phases:
 - `Bonus AI System Design/` — `framework_and_tradeoffs.md` and `architecture_patterns.md`,
   a two-part system-design-interview series referenced from the root README.
 - `Project_1 Smart Inbox Triage/`, `Project_2 Research Copilot/`,
-  `Project_3 Autonomous Content Desk/`, `Project_4 Recipe & Meal Planner/` — see
-  "Practice Projects" below.
+  `Project_3 Autonomous Content Desk/`, `Project_4 Recipe & Meal Planner/`,
+  `Project_5 Travel Itinerary Planner/` — see "Practice Projects" below.
 
 ## Running a phase project
 
@@ -62,11 +62,11 @@ the exact entry point and any phase-specific deviation:
 ## Practice Projects — cross-phase, not standalone
 
 `Project_1 Smart Inbox Triage/`, `Project_2 Research Copilot/`,
-`Project_3 Autonomous Content Desk/`, and `Project_4 Recipe & Meal Planner/` each combine
-2-3 adjacent phases into one project. Critically, **they import the relevant phase's
-actual code directly** rather than duplicating logic — each project's core module
-(`triage.py`, `copilot_graph.py`, `crew.py`, `meal_planner.py`) does this at the top of
-the file:
+`Project_3 Autonomous Content Desk/`, `Project_4 Recipe & Meal Planner/`, and
+`Project_5 Travel Itinerary Planner/` each combine 2-3 adjacent phases into one project.
+Critically, **they import the relevant phase's actual code directly** rather than
+duplicating logic — each project's core module (`triage.py`, `copilot_graph.py`,
+`crew.py`, `meal_planner.py`, `itinerary_planner.py`) does this at the top of the file:
 
 ```python
 _REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -118,9 +118,10 @@ First run on a fresh checkout establishes the baseline rather than failing.
 - **Phase 2** (`extractor.py` + `models.py`) builds structured extraction on `instructor` +
   Pydantic models per document type (email, job posting, article, meeting notes, receipt).
   Project 1 imports `DataExtractor` and the shared `Priority`/`Sentiment`/`ActionItem`
-  types from here directly. Project 4 also imports `DataExtractor`, calling its generic
-  `extract(text, output_model)` entry point against its own locally-defined Pydantic
-  models rather than the email/job-posting/etc. types defined in this phase's `models.py`.
+  types from here directly. Project 4 and Project 5 also import `DataExtractor`, each
+  calling its generic `extract(text, output_model)` entry point against their own
+  locally-defined Pydantic models rather than the email/job-posting/etc. types defined
+  in this phase's `models.py`.
 - **Phase 3** (`doc_chat.py`) is a LangChain LCEL chain with `RunnableWithMessageHistory`
   for multi-turn memory over loaded documents. Project 2 reuses its *memory pattern*
   (recent turns woven into the next query) rather than importing `DocChat` itself, since
@@ -131,8 +132,14 @@ First run on a fresh checkout establishes the baseline rather than failing.
   trust local retrieval or fall back to live web search. Project 4 also imports `RAGEngine`
   directly, for cited Q&A over a personal recipe collection.
 - **Phase 5** (`research_agent.py` + `tools.py`) is a LangGraph `StateGraph` ReAct agent
-  with a SQLite checkpointer and human-in-the-loop support. Project 2 imports
-  `ResearchAgent` directly as its low-confidence fallback.
+  with `MemorySaver`-backed memory (in-process, per `thread_id`, not persisted to disk
+  despite `langgraph-checkpoint-sqlite` sitting in this phase's `requirements.txt` — that
+  package isn't actually used by `research_agent.py`) and optional human-in-the-loop
+  support. Project 2 imports `ResearchAgent` directly as its low-confidence fallback.
+  Project 5 imports it as its primary research step, calling `.research()` multiple times
+  per request with a unique `thread_id` each time — reusing a `thread_id` across calls
+  silently appends to that thread's prior conversation instead of starting fresh, since
+  `AgentState.messages` uses an `add_messages` reducer.
 - **Phase 6** (`agents.py`, `tasks.py`, `tools.py`, `content_factory.py`) is a CrewAI
   multi-agent pipeline (research → write → edit → publish) fanning out to 3 platforms in
   parallel. Project 3 imports `ContentFactory` directly and wraps it with a FastAPI layer.

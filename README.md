@@ -260,6 +260,13 @@ AI-Engineering-Bootcamp/
 │   ├── .env.example
 │   └── sample_recipes/
 │
+├── Project_5 Travel Itinerary Planner/
+│   ├── README.md
+│   ├── itinerary_planner.py           ← imports Phase 2 + 5 code directly
+│   ├── demo.py
+│   ├── requirements.txt
+│   └── .env.example
+│
 └── Bonus AI System Design/
     ├── framework_and_tradeoffs.md
     └── architecture_patterns.md
@@ -310,7 +317,7 @@ the authoritative quick-start for that phase, more so than this table.
 
 ## Practice Projects
 
-The phases above are practiced one at a time. These four combine adjacent
+The phases above are practiced one at a time. These five combine adjacent
 phases into a single project each, so you get real end-to-end reps chaining
 skills together, the way a real feature actually needs them. Each imports
 the relevant phase's code directly rather than duplicating it.
@@ -321,6 +328,7 @@ the relevant phase's code directly rather than duplicating it.
 | [`Project_2 Research Copilot`](Project_2%20Research%20Copilot/README.md) | Phase 3 + 4 + 5 | Multi-turn chat over your own documents that falls back to live web research when local retrieval isn't confident | `python demo.py` |
 | [`Project_3 Autonomous Content Desk`](Project_3%20Autonomous%20Content%20Desk/README.md) | Phase 6 + 7 + 8 | A FastAPI service fronting the multi-agent content crew, plus a fine-tune-vs-general-agent comparison endpoint, with a content-quality evaluation gate | `docker-compose up --build` |
 | [`Project_4 Recipe & Meal Planner`](Project_4%20Recipe%20%26%20Meal%20Planner/README.md) | Phase 2 + 4 | Cited Q&A over your own recipes, matches what you can cook against ingredients you already have, and merges a shopping list across chosen recipes | `python demo.py` |
+| [`Project_5 Travel Itinerary Planner`](Project_5%20Travel%20Itinerary%20Planner/README.md) | Phase 2 + 5 | Live-researches a destination via a ReAct agent, then structures the findings into a day-by-day itinerary with practical tips and sources | `python demo.py` |
 
 ## Bonus: AI System Design for Interviews
 
@@ -361,6 +369,7 @@ See `Bonus AI System Design/`.
 [x] Project 2 - Research Copilot
 [x] Project 3 - Autonomous Content Desk
 [x] Project 4 - Recipe & Meal Planner
+[x] Project 5 - Travel Itinerary Planner
 [x] Bonus - AI System Design (Parts 1-2)
 ```
 
